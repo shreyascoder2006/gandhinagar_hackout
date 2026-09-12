@@ -1,0 +1,9 @@
+key,label,canonical_unit,kgco2e_per_unit,gj_per_unit,source,confidence,year
+grid_electricity,Grid electricity (Gujarat / all-India grid-connected),kWh,0.727,0.0036,"CEA CO2 Baseline Database v19.0 (weighted average emission factor, FY2023-24) — see sources.md #1",real,2024
+natural_gas,Natural gas (PNG),SCM,2.04,0.0364,"IPCC 2006 Vol.2 Table 1.4/2.2: 56.1 kgCO2/GJ x NCV 36.4 MJ/SCM — see sources.md #2",real,2006
+coal,Indian non-coking coal,t,1700,18,"IPCC 2006 default 94.6 kgCO2/GJ (other bituminous coal) x India NCV ~18 GJ/t (MoEFCC BUR-3) — see sources.md #2",real,2006
+pet_coke,Petroleum coke,t,3200,32.5,"IPCC 2006 Vol.2 Table 1.4/2.2: 97.5 kgCO2/GJ x NCV 32.5 GJ/t — see sources.md #2",real,2006
+furnace_oil,Furnace oil / HFO (residual fuel oil),L,3.11,0.0402,"IPCC 2006 Vol.2 Table 1.4/2.2: 77.4 kgCO2/GJ x NCV 40.2 MJ/L — see sources.md #2",real,2006
+diesel,Diesel (HSD / gas-diesel oil),L,2.68,0.0363,"IPCC 2006 Vol.2 Table 1.4/2.2: 74.1 kgCO2/GJ x NCV 36.3 MJ/L — see sources.md #2",real,2006
+lpg,LPG,kg,2.98,0.0473,"IPCC 2006 Vol.2 Table 1.4/2.2: 63.1 kgCO2/GJ x NCV 47.3 MJ/kg — see sources.md #2",real,2006
+biomass,Biomass / agri-residue briquettes,t,40,15,"Biogenic CO2 excluded from combustion total per IPCC convention; 40 kg/t allocated to processing+transport (CEA/MNRE guidance, not a single cited table)",medium,2020

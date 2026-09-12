@@ -1,0 +1,66 @@
+[
+  {
+    "id": "morbi",
+    "name": "Morbi",
+    "district": "Morbi",
+    "lat": 22.82,
+    "lon": 70.84,
+    "dominantSectors": [
+      "Ceramics"
+    ]
+  },
+  {
+    "id": "vapi",
+    "name": "Vapi",
+    "district": "Valsad",
+    "lat": 20.37,
+    "lon": 72.9,
+    "dominantSectors": [
+      "Chemicals",
+      "Dyes & pigments"
+    ]
+  },
+  {
+    "id": "ankleshwar",
+    "name": "Ankleshwar",
+    "district": "Bharuch",
+    "lat": 21.63,
+    "lon": 73,
+    "dominantSectors": [
+      "Chemicals",
+      "Pharma"
+    ]
+  },
+  {
+    "id": "surat",
+    "name": "Surat",
+    "district": "Surat",
+    "lat": 21.17,
+    "lon": 72.83,
+    "dominantSectors": [
+      "Textiles"
+    ]
+  },
+  {
+    "id": "rajkot",
+    "name": "Rajkot",
+    "district": "Rajkot",
+    "lat": 22.3,
+    "lon": 70.8,
+    "dominantSectors": [
+      "Engineering",
+      "Foundry"
+    ]
+  },
+  {
+    "id": "jamnagar",
+    "name": "Jamnagar",
+    "district": "Jamnagar",
+    "lat": 22.47,
+    "lon": 70.07,
+    "dominantSectors": [
+      "Brass parts",
+      "Petrochemicals"
+    ]
+  }
+]

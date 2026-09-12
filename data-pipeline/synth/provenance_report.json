@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "random_seed": 42,
+  "total_factories": 120,
+  "factories_by_cluster": {
+    "morbi": 18,
+    "vapi": 14,
+    "ankleshwar": 12,
+    "surat": 16,
+    "rajkot": 14,
+    "jamnagar": 10,
+    "vatva": 16,
+    "dahej": 10,
+    "alang": 10
+  },
+  "factories_by_sector": {
+    "Ceramics": 18,
+    "Chemicals": 49,
+    "Textiles": 24,
+    "Engineering": 29
+  },
+  "injected_anomaly_count": 26,
+  "injected_anomaly_factory_count": 20,
+  "field_provenance": {
+    "cluster_geography": "real (see clean/clusters.csv, sources.md #5)",
+    "emission_factors": "real (see clean/emission_factors.csv, sources.md #1-2)",
+    "process_benchmark_intensities": "documented estimate, medium confidence, except Textiles which is real BEE PAT Cycle-1 (see clean/sector_benchmarks.csv, sources.md #4)",
+    "waste_ratios": "calibrated to CPCB 2019-20 Gujarat state total order-of-magnitude (see clean/waste_ratios.csv, sources.md #3)",
+    "factory_identity_and_time_series": "100% synthetic, seeded+reproducible (this script)",
+    "output_scale_ranges": "is_placeholder, illustrative only (see LIMITATIONS.md #7)"
+  }
+}

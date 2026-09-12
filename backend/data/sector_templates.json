@@ -1,0 +1,444 @@
+{
+  "Ceramics": [
+    {
+      "id": "kiln",
+      "label": "Roller Kiln",
+      "kind": "kiln",
+      "share": 0.52,
+      "benchmark": 185,
+      "position": [
+        -1.5,
+        0,
+        -3.2
+      ],
+      "scale": [
+        8,
+        2.2,
+        2.4
+      ],
+      "rootCauseHint": "Firing profile 26% above benchmark dwell; kiln-car loading below optimal."
+    },
+    {
+      "id": "dryer",
+      "label": "Spray Dryer",
+      "kind": "dryer",
+      "share": 0.22,
+      "benchmark": 96,
+      "position": [
+        4.8,
+        0,
+        -2.6
+      ],
+      "scale": [
+        2.4,
+        5.2,
+        2.4
+      ],
+      "rootCauseHint": "Slip moisture above optimal, raising evaporation load per tonne of powder."
+    },
+    {
+      "id": "compressor",
+      "label": "Compressor House",
+      "kind": "compressor",
+      "share": 0.09,
+      "benchmark": 34,
+      "position": [
+        5,
+        0,
+        2.6
+      ],
+      "scale": [
+        3,
+        1.6,
+        2.6
+      ],
+      "rootCauseHint": "Compressed-air specific energy near benchmark."
+    },
+    {
+      "id": "glaze",
+      "label": "Glazing Line",
+      "kind": "generic",
+      "share": 0.08,
+      "benchmark": 22,
+      "position": [
+        -0.8,
+        0,
+        1.4
+      ],
+      "scale": [
+        7,
+        1.4,
+        1.6
+      ],
+      "rootCauseHint": "Glaze rework/rejection above benchmark."
+    },
+    {
+      "id": "etp",
+      "label": "Effluent Treatment Plant",
+      "kind": "effluent",
+      "share": 0.09,
+      "benchmark": 28,
+      "position": [
+        -5.4,
+        0,
+        3.4
+      ],
+      "scale": [
+        3.6,
+        1.4,
+        3.2
+      ],
+      "rootCauseHint": "ETP sludge landfilled rather than reused."
+    }
+  ],
+  "Chemicals": [
+    {
+      "id": "boiler",
+      "label": "Steam Boiler",
+      "kind": "boiler",
+      "share": 0.42,
+      "benchmark": 240,
+      "position": [
+        -2,
+        0,
+        -3
+      ],
+      "scale": [
+        4,
+        3,
+        2.6
+      ],
+      "rootCauseHint": "Boiler efficiency 33 pts below benchmark; no economiser, poor condensate return."
+    },
+    {
+      "id": "reactor",
+      "label": "Reactor Heating",
+      "kind": "furnace",
+      "share": 0.2,
+      "benchmark": 110,
+      "position": [
+        3.5,
+        0,
+        -2.5
+      ],
+      "scale": [
+        2.6,
+        2.4,
+        2.6
+      ],
+      "rootCauseHint": "Thermic-fluid heater cycling on batch loads."
+    },
+    {
+      "id": "column",
+      "label": "Distillation Column",
+      "kind": "generic",
+      "share": 0.18,
+      "benchmark": 95,
+      "position": [
+        -0.5,
+        0,
+        1.5
+      ],
+      "scale": [
+        6,
+        1.5,
+        1.6
+      ],
+      "rootCauseHint": "Solvent losses to incineration rather than recovery."
+    },
+    {
+      "id": "compressor",
+      "label": "Compressor House",
+      "kind": "compressor",
+      "share": 0.08,
+      "benchmark": 30,
+      "position": [
+        5,
+        0,
+        2.6
+      ],
+      "scale": [
+        3,
+        1.6,
+        2.6
+      ],
+      "rootCauseHint": "Compressed-air near benchmark."
+    },
+    {
+      "id": "etp",
+      "label": "Effluent Treatment Plant",
+      "kind": "effluent",
+      "share": 0.12,
+      "benchmark": 60,
+      "position": [
+        -5.4,
+        0,
+        3.4
+      ],
+      "scale": [
+        3.6,
+        1.4,
+        3.2
+      ],
+      "rootCauseHint": "High-COD effluent aerobically treated with no biogas capture."
+    }
+  ],
+  "Textiles": [
+    {
+      "id": "boiler",
+      "label": "Thermic Fluid Heater / Boiler",
+      "kind": "boiler",
+      "share": 0.45,
+      "benchmark": 150,
+      "position": [
+        -2,
+        0,
+        -3
+      ],
+      "scale": [
+        4,
+        3,
+        2.6
+      ],
+      "rootCauseHint": "Coal-fired heater 33 pts below benchmark efficiency; no flue-gas recovery."
+    },
+    {
+      "id": "stenter",
+      "label": "Stenter (Drying)",
+      "kind": "dryer",
+      "share": 0.25,
+      "benchmark": 80,
+      "position": [
+        4.8,
+        0,
+        -2.6
+      ],
+      "scale": [
+        2.4,
+        5.2,
+        2.4
+      ],
+      "rootCauseHint": "Stenter exhaust not recirculated; over-drying on some qualities."
+    },
+    {
+      "id": "dyeing",
+      "label": "Dyeing Line",
+      "kind": "generic",
+      "share": 0.15,
+      "benchmark": 50,
+      "position": [
+        -0.8,
+        0,
+        1.4
+      ],
+      "scale": [
+        7,
+        1.4,
+        1.6
+      ],
+      "rootCauseHint": "Single-use dye baths; caustic not recovered."
+    },
+    {
+      "id": "compressor",
+      "label": "Compressor House",
+      "kind": "compressor",
+      "share": 0.05,
+      "benchmark": 20,
+      "position": [
+        5,
+        0,
+        2.6
+      ],
+      "scale": [
+        3,
+        1.6,
+        2.6
+      ],
+      "rootCauseHint": "Near benchmark."
+    },
+    {
+      "id": "etp",
+      "label": "Effluent Treatment Plant",
+      "kind": "effluent",
+      "share": 0.1,
+      "benchmark": 40,
+      "position": [
+        -5.4,
+        0,
+        3.4
+      ],
+      "scale": [
+        3.6,
+        1.4,
+        3.2
+      ],
+      "rootCauseHint": "Fresh water drawn for all process stages; no tertiary reuse."
+    }
+  ],
+  "Engineering": [
+    {
+      "id": "furnace",
+      "label": "Induction Furnace",
+      "kind": "furnace",
+      "share": 0.55,
+      "benchmark": 320,
+      "position": [
+        -1.5,
+        0,
+        -3
+      ],
+      "scale": [
+        5,
+        2.6,
+        2.6
+      ],
+      "rootCauseHint": "Melt energy 39% above benchmark; low scrap return, cold charge."
+    },
+    {
+      "id": "heat-treat",
+      "label": "Heat Treatment",
+      "kind": "generic",
+      "share": 0.2,
+      "benchmark": 110,
+      "position": [
+        -0.5,
+        0,
+        1.5
+      ],
+      "scale": [
+        6,
+        1.5,
+        1.6
+      ],
+      "rootCauseHint": "Part-loaded heat-treatment cycles."
+    },
+    {
+      "id": "compressor",
+      "label": "Compressor House",
+      "kind": "compressor",
+      "share": 0.12,
+      "benchmark": 40,
+      "position": [
+        5,
+        0,
+        2.6
+      ],
+      "scale": [
+        3,
+        1.6,
+        2.6
+      ],
+      "rootCauseHint": "Load/unload cycling on fixed-speed compressors."
+    },
+    {
+      "id": "sand-dryer",
+      "label": "Sand Drying",
+      "kind": "dryer",
+      "share": 0.05,
+      "benchmark": 25,
+      "position": [
+        4.8,
+        0,
+        -2.6
+      ],
+      "scale": [
+        2.4,
+        4,
+        2.4
+      ],
+      "rootCauseHint": "Near benchmark."
+    },
+    {
+      "id": "etp",
+      "label": "Effluent / Slag Yard",
+      "kind": "effluent",
+      "share": 0.08,
+      "benchmark": 20,
+      "position": [
+        -5.4,
+        0,
+        3.4
+      ],
+      "scale": [
+        3.6,
+        1.4,
+        3.2
+      ],
+      "rootCauseHint": "Slag sent to landfill; usable as aggregate."
+    }
+  ],
+  "Building materials": [
+    {
+      "id": "kiln",
+      "label": "Brick Kiln",
+      "kind": "kiln",
+      "share": 0.6,
+      "benchmark": 160,
+      "position": [
+        -1.5,
+        0,
+        -3.2
+      ],
+      "scale": [
+        8,
+        2.2,
+        2.4
+      ],
+      "rootCauseHint": "Firing 26% above benchmark; clamp-style firing."
+    },
+    {
+      "id": "dryer",
+      "label": "Green-brick Dryer",
+      "kind": "dryer",
+      "share": 0.2,
+      "benchmark": 55,
+      "position": [
+        4.8,
+        0,
+        -2.6
+      ],
+      "scale": [
+        2.4,
+        4,
+        2.4
+      ],
+      "rootCauseHint": "Open-air drying; weather-dependent throughput."
+    },
+    {
+      "id": "compressor",
+      "label": "Compressor House",
+      "kind": "compressor",
+      "share": 0.1,
+      "benchmark": 25,
+      "position": [
+        5,
+        0,
+        2.6
+      ],
+      "scale": [
+        3,
+        1.6,
+        2.6
+      ],
+      "rootCauseHint": "Near benchmark."
+    },
+    {
+      "id": "mixing",
+      "label": "Raw-material Mixing",
+      "kind": "generic",
+      "share": 0.1,
+      "benchmark": 20,
+      "position": [
+        -0.8,
+        0,
+        1.4
+      ],
+      "scale": [
+        7,
+        1.4,
+        1.6
+      ],
+      "rootCauseHint": "100% virgin clay; no secondary-material substitution."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+sector,process_id,process_label,process_kind,share_of_energy,benchmark_intensity_kgco2e_per_t,source,confidence
+Ceramics,kiln,Roller Kiln,kiln,0.52,185,"Documented cleaner-production/audit-literature estimate for vitrified-tile roller kilns; NOT BEE PAT (ceramics was outside PAT Cycle-1 scope, see sources.md #4). Cross-referenced against TERI ceramics PAT-widening study (2021) by name only, values not machine-extracted this run.",medium
+Ceramics,dryer,Spray Dryer,dryer,0.22,96,"Documented cleaner-production/audit-literature estimate — see sources.md #4",medium
+Ceramics,compressor,Compressor House,compressor,0.09,34,"Documented cleaner-production/audit-literature estimate — see sources.md #4",medium
+Ceramics,glaze,Glazing Line,generic,0.08,22,"Documented cleaner-production/audit-literature estimate — see sources.md #4",medium
+Ceramics,etp,Effluent Treatment Plant,effluent,0.09,28,"Documented cleaner-production/audit-literature estimate — see sources.md #4",medium
+Chemicals,boiler,Steam Boiler,boiler,0.42,240,"Documented estimate (cleaner-production audit norms); NOT BEE PAT (Chemicals outside PAT Cycle-1 scope, see sources.md #4)",medium
+Chemicals,reactor,Reactor Heating,furnace,0.20,110,"Documented estimate (cleaner-production audit norms) — see sources.md #4",medium
+Chemicals,column,Distillation Column,generic,0.18,95,"Documented estimate (cleaner-production audit norms) — see sources.md #4",medium
+Chemicals,compressor,Compressor House,compressor,0.08,30,"Documented estimate (cleaner-production audit norms) — see sources.md #4",medium
+Chemicals,etp,Effluent Treatment Plant,effluent,0.12,60,"Documented estimate (cleaner-production audit norms) — see sources.md #4",medium
+Textiles,boiler,Thermic Fluid Heater / Boiler,boiler,0.45,150,"BEE PAT Cycle-1 (Textiles was one of the original 8 PAT sectors) — see sources.md #4",real
+Textiles,stenter,Stenter (Drying),dryer,0.25,80,"BEE PAT Cycle-1 (Textiles) — see sources.md #4",real
+Textiles,dyeing,Dyeing Line,generic,0.15,50,"BEE PAT Cycle-1 (Textiles) — see sources.md #4",real
+Textiles,compressor,Compressor House,compressor,0.05,20,"BEE PAT Cycle-1 (Textiles) — see sources.md #4",real
+Textiles,etp,Effluent Treatment Plant,effluent,0.10,40,"BEE PAT Cycle-1 (Textiles) — see sources.md #4",real
+Engineering,furnace,Induction Furnace,furnace,0.55,320,"Documented estimate (foundry cluster energy-audit norms); NOT BEE PAT (Engineering/foundry outside PAT Cycle-1 scope, see sources.md #4)",medium
+Engineering,heat-treat,Heat Treatment,generic,0.20,110,"Documented estimate (foundry cluster energy-audit norms) — see sources.md #4",medium
+Engineering,compressor,Compressor House,compressor,0.12,40,"Documented estimate (foundry cluster energy-audit norms) — see sources.md #4",medium
+Engineering,sand-dryer,Sand Drying,dryer,0.05,25,"Documented estimate (foundry cluster energy-audit norms) — see sources.md #4",medium
+Engineering,etp,Effluent / Slag Yard,effluent,0.08,20,"Documented estimate (foundry cluster energy-audit norms) — see sources.md #4",medium

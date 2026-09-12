@@ -1,0 +1,3139 @@
+[
+  {
+    "lat": 22.81,
+    "lon": 70.85000000000001,
+    "wasteStreams": [
+      {
+        "tag": "ceramic_sludge",
+        "label": "ETP ceramic sludge",
+        "tpy": 760,
+        "form": "solid",
+        "disposalCostInrPerT": 1400
+      },
+      {
+        "tag": "waste_heat_air",
+        "label": "Kiln cooling-zone hot air",
+        "tpy": 0,
+        "form": "heat",
+        "disposalCostInrPerT": 0
+      }
+    ],
+    "acceptedInputs": [
+      {
+        "tag": "fly_ash",
+        "label": "Fly ash (body filler)",
+        "maxTpy": 300,
+        "virginCostInrPerT": 2200
+      }
+    ],
+    "implementedInterventionIds": [],
+    "consentToShare": true,
+    "id": "demo-morbi-01",
+    "name": "Shreeji Ceramics Pvt. Ltd. (Demo)",
+    "sector": "Ceramics — Vitrified Tiles",
+    "cluster": "Morbi, Gujarat",
+    "outputTonnesPerMonth": 4200,
+    "totalCo2eTpy": 18650,
+    "totalEnergyMwhPerYear": 31200,
+    "totalWasteTpy": 2140,
+    "circularityRatio": 0.22,
+    "dataSource": "synthetic",
+    "nodes": [
+      {
+        "id": "kiln-1",
+        "label": "Roller Kiln Line 1",
+        "kind": "kiln",
+        "position": [
+          -1.5,
+          0,
+          -3.2
+        ],
+        "scale": [
+          8,
+          2.2,
+          2.4
+        ],
+        "co2eTpy": 9840,
+        "shareOfTotal": 0.528,
+        "benchmarkIntensity": 185,
+        "actualIntensity": 268,
+        "severity": "crit",
+        "confidence": "high",
+        "rootCause": "Firing temperature profile runs ~9% above the sub-sector benchmark, and kiln car loading density is below optimal, both increasing specific fuel consumption per tonne fired.",
+        "interventions": [
+          {
+            "id": "int-kiln1-1",
+            "title": "Waste-heat recovery from kiln cooling zone to dryer preheat",
+            "category": "heat-recovery",
+            "capexInr": 6800000,
+            "annualSavingInr": 3120000,
+            "co2ReductionTpy": 1380,
+            "paybackMonths": 26,
+            "confidence": "high",
+            "description": "Recover hot air from the kiln cooling zone (typically 180-250°C) to preheat the spray dryer or vertical dryer intake, cutting natural gas use in the drying stage."
+          },
+          {
+            "id": "int-kiln1-2",
+            "title": "Kiln car loading optimization + firing curve retune",
+            "category": "process-change",
+            "capexInr": 450000,
+            "annualSavingInr": 1860000,
+            "co2ReductionTpy": 640,
+            "paybackMonths": 3,
+            "confidence": "medium",
+            "description": "Increase kiln car loading density toward sub-sector benchmark and retune the firing curve to reduce peak-zone dwell time without compromising tile quality."
+          }
+        ]
+      },
+      {
+        "id": "spray-dryer",
+        "label": "Spray Dryer",
+        "kind": "dryer",
+        "position": [
+          4.8,
+          0,
+          -2.6
+        ],
+        "scale": [
+          2.4,
+          5.2,
+          2.4
+        ],
+        "co2eTpy": 4120,
+        "shareOfTotal": 0.221,
+        "benchmarkIntensity": 96,
+        "actualIntensity": 112,
+        "severity": "warn",
+        "confidence": "high",
+        "rootCause": "Moisture content of incoming slip is slightly above optimal, requiring longer residence time and higher fuel draw per tonne of powder produced.",
+        "interventions": [
+          {
+            "id": "int-dryer-1",
+            "title": "Slip moisture control via inline density monitoring",
+            "category": "process-change",
+            "capexInr": 920000,
+            "annualSavingInr": 640000,
+            "co2ReductionTpy": 210,
+            "paybackMonths": 17,
+            "confidence": "medium",
+            "description": "Install inline slip density/moisture sensors to tighten feed consistency and cut excess evaporation load on the spray dryer."
+          }
+        ]
+      },
+      {
+        "id": "compressor-house",
+        "label": "Compressor House",
+        "kind": "compressor",
+        "position": [
+          5,
+          0,
+          2.6
+        ],
+        "scale": [
+          3,
+          1.6,
+          2.6
+        ],
+        "co2eTpy": 1720,
+        "shareOfTotal": 0.092,
+        "benchmarkIntensity": 34,
+        "actualIntensity": 33,
+        "severity": "ok",
+        "confidence": "high",
+        "rootCause": "Compressed-air specific energy is within 3% of sub-sector benchmark; no significant leak signature detected in current usage pattern.",
+        "interventions": [
+          {
+            "id": "int-comp-1",
+            "title": "Ultrasonic leak audit (routine)",
+            "category": "process-change",
+            "capexInr": 120000,
+            "annualSavingInr": 260000,
+            "co2ReductionTpy": 70,
+            "paybackMonths": 6,
+            "confidence": "medium",
+            "description": "Quarterly ultrasonic leak detection typically recovers 5-8% of compressed-air losses even in well-run systems."
+          }
+        ]
+      },
+      {
+        "id": "glaze-line",
+        "label": "Glazing Line",
+        "kind": "generic",
+        "position": [
+          -0.8,
+          0,
+          1.4
+        ],
+        "scale": [
+          7,
+          1.4,
+          1.6
+        ],
+        "co2eTpy": 1380,
+        "shareOfTotal": 0.074,
+        "benchmarkIntensity": 22,
+        "actualIntensity": 27,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Glaze slip rework/rejection rate slightly above benchmark, increasing re-processing energy per tonne of finished tile.",
+        "interventions": [
+          {
+            "id": "int-glaze-1",
+            "title": "Recycle glaze overspray into base slip (closed loop)",
+            "category": "recycling-loop",
+            "circularityGainPct": 0.05,
+            "capexInr": 380000,
+            "annualSavingInr": 510000,
+            "co2ReductionTpy": 95,
+            "paybackMonths": 9,
+            "confidence": "medium",
+            "description": "Capture and reintroduce glaze overspray into the base slip line instead of disposing as waste, cutting both material cost and waste-treatment load."
+          }
+        ]
+      },
+      {
+        "id": "effluent-etp",
+        "label": "Effluent Treatment Plant",
+        "kind": "effluent",
+        "position": [
+          -5.4,
+          0,
+          3.4
+        ],
+        "scale": [
+          3.6,
+          1.4,
+          3.2
+        ],
+        "co2eTpy": 1590,
+        "shareOfTotal": 0.085,
+        "benchmarkIntensity": 28,
+        "actualIntensity": 41,
+        "severity": "crit",
+        "confidence": "medium",
+        "rootCause": "Sludge from the ETP is currently landfilled rather than reused; body-preparation waste feed could substitute a portion of raw material input at nearby brick units (industrial symbiosis candidate).",
+        "interventions": [
+          {
+            "id": "int-etp-1",
+            "title": "Waste-to-input match: ETP sludge → nearby brick/block units",
+            "category": "waste-to-input",
+            "circularityGainPct": 0.09,
+            "capexInr": 260000,
+            "annualSavingInr": 780000,
+            "co2ReductionTpy": 310,
+            "paybackMonths": 4,
+            "confidence": "low",
+            "description": "Two brick/block manufacturing units within 12km of this cluster can use dewatered ceramic sludge as a partial raw-material substitute — flagged as an industrial-symbiosis match by the state aggregation layer."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "morbi-02",
+    "name": "Rajshree Vitrified LLP",
+    "sector": "Ceramics — Vitrified tiles",
+    "cluster": "Morbi, Gujarat",
+    "outputTonnesPerMonth": 5100,
+    "totalCo2eTpy": 21400,
+    "totalEnergyMwhPerYear": 35600,
+    "totalWasteTpy": 2500,
+    "circularityRatio": 0.18,
+    "dataSource": "synthetic",
+    "nodes": [
+      {
+        "id": "morbi-02:kiln",
+        "label": "Roller Kiln",
+        "kind": "kiln",
+        "position": [
+          -1.5,
+          0,
+          -3.2
+        ],
+        "scale": [
+          8,
+          2.2,
+          2.4
+        ],
+        "co2eTpy": 11128,
+        "shareOfTotal": 0.52,
+        "benchmarkIntensity": 185,
+        "actualIntensity": 242,
+        "severity": "crit",
+        "confidence": "medium",
+        "rootCause": "Firing profile 26% above benchmark dwell; kiln-car loading below optimal.",
+        "interventions": [
+          {
+            "id": "morbi-02:kiln:kiln-whr",
+            "title": "Waste-heat recovery from kiln cooling zone to dryer preheat",
+            "category": "heat-recovery",
+            "capexInr": 17000000,
+            "annualSavingInr": 3521080,
+            "co2ReductionTpy": 1558,
+            "paybackMonths": 58,
+            "confidence": "high",
+            "description": "Recover 180–250 °C cooling-zone air to preheat the dryer intake, cutting natural-gas use in drying."
+          },
+          {
+            "id": "morbi-02:kiln:kiln-loading",
+            "title": "Kiln car loading optimisation + firing curve retune",
+            "category": "process-change",
+            "capexInr": 1125000,
+            "annualSavingInr": 2096700,
+            "co2ReductionTpy": 723,
+            "paybackMonths": 6,
+            "confidence": "medium",
+            "description": "Raise loading density toward benchmark and shorten peak-zone dwell without quality loss."
+          }
+        ]
+      },
+      {
+        "id": "morbi-02:dryer",
+        "label": "Spray Dryer",
+        "kind": "dryer",
+        "position": [
+          4.8,
+          0,
+          -2.6
+        ],
+        "scale": [
+          2.4,
+          5.2,
+          2.4
+        ],
+        "co2eTpy": 4708,
+        "shareOfTotal": 0.22,
+        "benchmarkIntensity": 96,
+        "actualIntensity": 108,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Slip moisture above optimal, raising evaporation load per tonne of powder.",
+        "interventions": [
+          {
+            "id": "morbi-02:dryer:dryer-moisture",
+            "title": "Inline moisture / density control on dryer feed",
+            "category": "process-change",
+            "capexInr": 2165680,
+            "annualSavingInr": 716750,
+            "co2ReductionTpy": 235,
+            "paybackMonths": 36,
+            "confidence": "medium",
+            "description": "Tighten feed consistency to cut excess evaporation load."
+          },
+          {
+            "id": "morbi-02:dryer:dryer-exhaust",
+            "title": "Exhaust-air recirculation on dryer / stenter",
+            "category": "heat-recovery",
+            "capexInr": 3766400,
+            "annualSavingInr": 1083300,
+            "co2ReductionTpy": 471,
+            "paybackMonths": 42,
+            "confidence": "high",
+            "description": "Recirculate part of the hot exhaust; standard on stenters and spray dryers."
+          }
+        ]
+      },
+      {
+        "id": "morbi-02:compressor",
+        "label": "Compressor House",
+        "kind": "compressor",
+        "position": [
+          5,
+          0,
+          2.6
+        ],
+        "scale": [
+          3,
+          1.6,
+          2.6
+        ],
+        "co2eTpy": 1926,
+        "shareOfTotal": 0.09,
+        "benchmarkIntensity": 34,
+        "actualIntensity": 35,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Compressed-air specific energy near benchmark.",
+        "interventions": [
+          {
+            "id": "morbi-02:compressor:air-leak",
+            "title": "Ultrasonic compressed-air leak audit (routine)",
+            "category": "process-change",
+            "capexInr": 115560,
+            "annualSavingInr": 284900,
+            "co2ReductionTpy": 77,
+            "paybackMonths": 5,
+            "confidence": "medium",
+            "description": "Quarterly leak detection recovers 5–8 % of losses even in well-run systems."
+          },
+          {
+            "id": "morbi-02:compressor:air-vsd",
+            "title": "VSD retrofit on lead compressor",
+            "category": "process-change",
+            "capexInr": 1059300,
+            "annualSavingInr": 854700,
+            "co2ReductionTpy": 231,
+            "paybackMonths": 15,
+            "confidence": "high",
+            "description": "Match compressor output to demand instead of load/unload cycling."
+          }
+        ]
+      },
+      {
+        "id": "morbi-02:glaze",
+        "label": "Glazing Line",
+        "kind": "generic",
+        "position": [
+          -0.8,
+          0,
+          1.4
+        ],
+        "scale": [
+          7,
+          1.4,
+          1.6
+        ],
+        "co2eTpy": 1712,
+        "shareOfTotal": 0.08,
+        "benchmarkIntensity": 22,
+        "actualIntensity": 26,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Glaze rework/rejection above benchmark.",
+        "interventions": [
+          {
+            "id": "morbi-02:glaze:glaze-recycle",
+            "title": "Recycle glaze overspray into base slip (closed loop)",
+            "category": "recycling-loop",
+            "capexInr": 325280,
+            "annualSavingInr": 648000,
+            "co2ReductionTpy": 120,
+            "paybackMonths": 6,
+            "confidence": "medium",
+            "description": "Capture and reintroduce overspray instead of disposing as waste.",
+            "circularityGainPct": 0.05
+          }
+        ]
+      },
+      {
+        "id": "morbi-02:etp",
+        "label": "Effluent Treatment Plant",
+        "kind": "effluent",
+        "position": [
+          -5.4,
+          0,
+          3.4
+        ],
+        "scale": [
+          3.6,
+          1.4,
+          3.2
+        ],
+        "co2eTpy": 1926,
+        "shareOfTotal": 0.09,
+        "benchmarkIntensity": 28,
+        "actualIntensity": 38,
+        "severity": "crit",
+        "confidence": "medium",
+        "rootCause": "ETP sludge landfilled rather than reused.",
+        "interventions": [
+          {
+            "id": "morbi-02:etp:etp-sludge-symbiosis",
+            "title": "Waste-to-input: ETP sludge → nearby brick/block units",
+            "category": "waste-to-input",
+            "capexInr": 250380,
+            "annualSavingInr": 962500,
+            "co2ReductionTpy": 385,
+            "paybackMonths": 3,
+            "confidence": "low",
+            "description": "Dewatered sludge substitutes part of the raw material at nearby brick/block units.",
+            "circularityGainPct": 0.09
+          },
+          {
+            "id": "morbi-02:etp:etp-biogas",
+            "title": "Anaerobic pre-treatment with biogas capture",
+            "category": "waste-to-input",
+            "capexInr": 3081600,
+            "annualSavingInr": 867600,
+            "co2ReductionTpy": 482,
+            "paybackMonths": 43,
+            "confidence": "medium",
+            "description": "Capture methane from high-COD effluent and use it in the boiler.",
+            "circularityGainPct": 0.06
+          },
+          {
+            "id": "morbi-02:etp:etp-water-reuse",
+            "title": "Tertiary treatment + process water reuse",
+            "category": "recycling-loop",
+            "capexInr": 1829700,
+            "annualSavingInr": 323400,
+            "co2ReductionTpy": 154,
+            "paybackMonths": 68,
+            "confidence": "medium",
+            "description": "Reuse treated effluent for non-critical process water; cuts fresh-water pumping.",
+            "circularityGainPct": 0.04
+          }
+        ]
+      }
+    ],
+    "lat": 22.84,
+    "lon": 70.81,
+    "wasteStreams": [
+      {
+        "tag": "ceramic_sludge",
+        "label": "ETP ceramic sludge",
+        "tpy": 900,
+        "form": "solid",
+        "disposalCostInrPerT": 1400
+      },
+      {
+        "tag": "waste_heat_air",
+        "label": "Kiln cooling-zone hot air",
+        "tpy": 0,
+        "form": "heat",
+        "disposalCostInrPerT": 0
+      }
+    ],
+    "acceptedInputs": [
+      {
+        "tag": "fly_ash",
+        "label": "Fly ash (body filler)",
+        "maxTpy": 400,
+        "virginCostInrPerT": 2200
+      }
+    ],
+    "implementedInterventionIds": [
+      "morbi-02:compressor:air-leak"
+    ],
+    "consentToShare": true
+  },
+  {
+    "id": "morbi-03",
+    "name": "Sunray Wall Tiles",
+    "sector": "Ceramics — Wall tiles",
+    "cluster": "Morbi, Gujarat",
+    "outputTonnesPerMonth": 2600,
+    "totalCo2eTpy": 10900,
+    "totalEnergyMwhPerYear": 18100,
+    "totalWasteTpy": 1300,
+    "circularityRatio": 0.27,
+    "dataSource": "synthetic",
+    "nodes": [
+      {
+        "id": "morbi-03:kiln",
+        "label": "Roller Kiln",
+        "kind": "kiln",
+        "position": [
+          -1.5,
+          0,
+          -3.2
+        ],
+        "scale": [
+          8,
+          2.2,
+          2.4
+        ],
+        "co2eTpy": 5668,
+        "shareOfTotal": 0.52,
+        "benchmarkIntensity": 185,
+        "actualIntensity": 200,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Firing profile 22% above benchmark dwell; kiln-car loading below optimal.",
+        "interventions": [
+          {
+            "id": "morbi-03:kiln:kiln-whr",
+            "title": "Waste-heat recovery from kiln cooling zone to dryer preheat",
+            "category": "heat-recovery",
+            "capexInr": 17000000,
+            "annualSavingInr": 1794440,
+            "co2ReductionTpy": 794,
+            "paybackMonths": 114,
+            "confidence": "high",
+            "description": "Recover 180–250 °C cooling-zone air to preheat the dryer intake, cutting natural-gas use in drying."
+          },
+          {
+            "id": "morbi-03:kiln:kiln-loading",
+            "title": "Kiln car loading optimisation + firing curve retune",
+            "category": "process-change",
+            "capexInr": 1125000,
+            "annualSavingInr": 1067200,
+            "co2ReductionTpy": 368,
+            "paybackMonths": 13,
+            "confidence": "medium",
+            "description": "Raise loading density toward benchmark and shorten peak-zone dwell without quality loss."
+          }
+        ]
+      },
+      {
+        "id": "morbi-03:dryer",
+        "label": "Spray Dryer",
+        "kind": "dryer",
+        "position": [
+          4.8,
+          0,
+          -2.6
+        ],
+        "scale": [
+          2.4,
+          5.2,
+          2.4
+        ],
+        "co2eTpy": 2398,
+        "shareOfTotal": 0.22,
+        "benchmarkIntensity": 96,
+        "actualIntensity": 101,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Slip moisture above optimal, raising evaporation load per tonne of powder.",
+        "interventions": [
+          {
+            "id": "morbi-03:dryer:dryer-moisture",
+            "title": "Inline moisture / density control on dryer feed",
+            "category": "process-change",
+            "capexInr": 1103080,
+            "annualSavingInr": 366000,
+            "co2ReductionTpy": 120,
+            "paybackMonths": 36,
+            "confidence": "medium",
+            "description": "Tighten feed consistency to cut excess evaporation load."
+          },
+          {
+            "id": "morbi-03:dryer:dryer-exhaust",
+            "title": "Exhaust-air recirculation on dryer / stenter",
+            "category": "heat-recovery",
+            "capexInr": 1918400,
+            "annualSavingInr": 552000,
+            "co2ReductionTpy": 240,
+            "paybackMonths": 42,
+            "confidence": "high",
+            "description": "Recirculate part of the hot exhaust; standard on stenters and spray dryers."
+          }
+        ]
+      },
+      {
+        "id": "morbi-03:compressor",
+        "label": "Compressor House",
+        "kind": "compressor",
+        "position": [
+          5,
+          0,
+          2.6
+        ],
+        "scale": [
+          3,
+          1.6,
+          2.6
+        ],
+        "co2eTpy": 981,
+        "shareOfTotal": 0.09,
+        "benchmarkIntensity": 34,
+        "actualIntensity": 33,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Compressed-air specific energy near benchmark.",
+        "interventions": [
+          {
+            "id": "morbi-03:compressor:air-leak",
+            "title": "Ultrasonic compressed-air leak audit (routine)",
+            "category": "process-change",
+            "capexInr": 58860,
+            "annualSavingInr": 144300,
+            "co2ReductionTpy": 39,
+            "paybackMonths": 5,
+            "confidence": "medium",
+            "description": "Quarterly leak detection recovers 5–8 % of losses even in well-run systems."
+          },
+          {
+            "id": "morbi-03:compressor:air-vsd",
+            "title": "VSD retrofit on lead compressor",
+            "category": "process-change",
+            "capexInr": 539550,
+            "annualSavingInr": 436600,
+            "co2ReductionTpy": 118,
+            "paybackMonths": 15,
+            "confidence": "high",
+            "description": "Match compressor output to demand instead of load/unload cycling."
+          }
+        ]
+      },
+      {
+        "id": "morbi-03:glaze",
+        "label": "Glazing Line",
+        "kind": "generic",
+        "position": [
+          -0.8,
+          0,
+          1.4
+        ],
+        "scale": [
+          7,
+          1.4,
+          1.6
+        ],
+        "co2eTpy": 872,
+        "shareOfTotal": 0.08,
+        "benchmarkIntensity": 22,
+        "actualIntensity": 23,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Glaze rework/rejection above benchmark.",
+        "interventions": [
+          {
+            "id": "morbi-03:glaze:glaze-recycle",
+            "title": "Recycle glaze overspray into base slip (closed loop)",
+            "category": "recycling-loop",
+            "capexInr": 165680,
+            "annualSavingInr": 329400,
+            "co2ReductionTpy": 61,
+            "paybackMonths": 6,
+            "confidence": "medium",
+            "description": "Capture and reintroduce overspray instead of disposing as waste.",
+            "circularityGainPct": 0.05
+          }
+        ]
+      },
+      {
+        "id": "morbi-03:etp",
+        "label": "Effluent Treatment Plant",
+        "kind": "effluent",
+        "position": [
+          -5.4,
+          0,
+          3.4
+        ],
+        "scale": [
+          3.6,
+          1.4,
+          3.2
+        ],
+        "co2eTpy": 981,
+        "shareOfTotal": 0.09,
+        "benchmarkIntensity": 28,
+        "actualIntensity": 31,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "ETP sludge landfilled rather than reused.",
+        "interventions": [
+          {
+            "id": "morbi-03:etp:etp-sludge-symbiosis",
+            "title": "Waste-to-input: ETP sludge → nearby brick/block units",
+            "category": "waste-to-input",
+            "capexInr": 127530,
+            "annualSavingInr": 490000,
+            "co2ReductionTpy": 196,
+            "paybackMonths": 3,
+            "confidence": "low",
+            "description": "Dewatered sludge substitutes part of the raw material at nearby brick/block units.",
+            "circularityGainPct": 0.09
+          },
+          {
+            "id": "morbi-03:etp:etp-biogas",
+            "title": "Anaerobic pre-treatment with biogas capture",
+            "category": "waste-to-input",
+            "capexInr": 1569600,
+            "annualSavingInr": 441000,
+            "co2ReductionTpy": 245,
+            "paybackMonths": 43,
+            "confidence": "medium",
+            "description": "Capture methane from high-COD effluent and use it in the boiler.",
+            "circularityGainPct": 0.06
+          },
+          {
+            "id": "morbi-03:etp:etp-water-reuse",
+            "title": "Tertiary treatment + process water reuse",
+            "category": "recycling-loop",
+            "capexInr": 931950,
+            "annualSavingInr": 163800,
+            "co2ReductionTpy": 78,
+            "paybackMonths": 68,
+            "confidence": "medium",
+            "description": "Reuse treated effluent for non-critical process water; cuts fresh-water pumping.",
+            "circularityGainPct": 0.04
+          }
+        ]
+      }
+    ],
+    "lat": 22.795,
+    "lon": 70.86,
+    "wasteStreams": [
+      {
+        "tag": "ceramic_sludge",
+        "label": "ETP ceramic sludge",
+        "tpy": 420,
+        "form": "solid",
+        "disposalCostInrPerT": 1400
+      }
+    ],
+    "acceptedInputs": [],
+    "implementedInterventionIds": [
+      "morbi-03:kiln:kiln-loading",
+      "morbi-03:glaze:glaze-recycle"
+    ],
+    "consentToShare": false
+  },
+  {
+    "id": "morbi-04",
+    "name": "Gokul Bricks & Blocks",
+    "sector": "Building materials — Fly-ash / clay bricks",
+    "cluster": "Morbi, Gujarat",
+    "outputTonnesPerMonth": 3800,
+    "totalCo2eTpy": 6200,
+    "totalEnergyMwhPerYear": 4100,
+    "totalWasteTpy": 300,
+    "circularityRatio": 0.31,
+    "dataSource": "synthetic",
+    "nodes": [
+      {
+        "id": "morbi-04:kiln",
+        "label": "Brick Kiln",
+        "kind": "kiln",
+        "position": [
+          -1.5,
+          0,
+          -3.2
+        ],
+        "scale": [
+          8,
+          2.2,
+          2.4
+        ],
+        "co2eTpy": 3720,
+        "shareOfTotal": 0.6,
+        "benchmarkIntensity": 160,
+        "actualIntensity": 195,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Firing 24% above benchmark; clamp-style firing.",
+        "interventions": [
+          {
+            "id": "morbi-04:kiln:kiln-whr",
+            "title": "Waste-heat recovery from kiln cooling zone to dryer preheat",
+            "category": "heat-recovery",
+            "capexInr": 12648000,
+            "annualSavingInr": 1177460,
+            "co2ReductionTpy": 521,
+            "paybackMonths": 129,
+            "confidence": "high",
+            "description": "Recover 180–250 °C cooling-zone air to preheat the dryer intake, cutting natural-gas use in drying."
+          },
+          {
+            "id": "morbi-04:kiln:kiln-loading",
+            "title": "Kiln car loading optimisation + firing curve retune",
+            "category": "process-change",
+            "capexInr": 837000,
+            "annualSavingInr": 701800,
+            "co2ReductionTpy": 242,
+            "paybackMonths": 14,
+            "confidence": "medium",
+            "description": "Raise loading density toward benchmark and shorten peak-zone dwell without quality loss."
+          }
+        ]
+      },
+      {
+        "id": "morbi-04:dryer",
+        "label": "Green-brick Dryer",
+        "kind": "dryer",
+        "position": [
+          4.8,
+          0,
+          -2.6
+        ],
+        "scale": [
+          2.4,
+          4,
+          2.4
+        ],
+        "co2eTpy": 1240,
+        "shareOfTotal": 0.2,
+        "benchmarkIntensity": 55,
+        "actualIntensity": 61,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Open-air drying; weather-dependent throughput.",
+        "interventions": [
+          {
+            "id": "morbi-04:dryer:dryer-moisture",
+            "title": "Inline moisture / density control on dryer feed",
+            "category": "process-change",
+            "capexInr": 570400,
+            "annualSavingInr": 189100,
+            "co2ReductionTpy": 62,
+            "paybackMonths": 36,
+            "confidence": "medium",
+            "description": "Tighten feed consistency to cut excess evaporation load."
+          },
+          {
+            "id": "morbi-04:dryer:dryer-exhaust",
+            "title": "Exhaust-air recirculation on dryer / stenter",
+            "category": "heat-recovery",
+            "capexInr": 992000,
+            "annualSavingInr": 285200,
+            "co2ReductionTpy": 124,
+            "paybackMonths": 42,
+            "confidence": "high",
+            "description": "Recirculate part of the hot exhaust; standard on stenters and spray dryers."
+          }
+        ]
+      },
+      {
+        "id": "morbi-04:compressor",
+        "label": "Compressor House",
+        "kind": "compressor",
+        "position": [
+          5,
+          0,
+          2.6
+        ],
+        "scale": [
+          3,
+          1.6,
+          2.6
+        ],
+        "co2eTpy": 620,
+        "shareOfTotal": 0.1,
+        "benchmarkIntensity": 25,
+        "actualIntensity": 25,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Near benchmark.",
+        "interventions": [
+          {
+            "id": "morbi-04:compressor:air-leak",
+            "title": "Ultrasonic compressed-air leak audit (routine)",
+            "category": "process-change",
+            "capexInr": 42000,
+            "annualSavingInr": 92500,
+            "co2ReductionTpy": 25,
+            "paybackMonths": 5,
+            "confidence": "medium",
+            "description": "Quarterly leak detection recovers 5–8 % of losses even in well-run systems."
+          },
+          {
+            "id": "morbi-04:compressor:air-vsd",
+            "title": "VSD retrofit on lead compressor",
+            "category": "process-change",
+            "capexInr": 385000,
+            "annualSavingInr": 273800,
+            "co2ReductionTpy": 74,
+            "paybackMonths": 17,
+            "confidence": "high",
+            "description": "Match compressor output to demand instead of load/unload cycling."
+          }
+        ]
+      },
+      {
+        "id": "morbi-04:mixing",
+        "label": "Raw-material Mixing",
+        "kind": "generic",
+        "position": [
+          -0.8,
+          0,
+          1.4
+        ],
+        "scale": [
+          7,
+          1.4,
+          1.6
+        ],
+        "co2eTpy": 620,
+        "shareOfTotal": 0.1,
+        "benchmarkIntensity": 20,
+        "actualIntensity": 20,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "100% virgin clay; no secondary-material substitution.",
+        "interventions": []
+      }
+    ],
+    "lat": 22.855,
+    "lon": 70.88000000000001,
+    "wasteStreams": [],
+    "acceptedInputs": [
+      {
+        "tag": "ceramic_sludge",
+        "label": "Ceramic sludge (clay substitute)",
+        "maxTpy": 2500,
+        "virginCostInrPerT": 900
+      },
+      {
+        "tag": "fly_ash",
+        "label": "Fly ash",
+        "maxTpy": 6000,
+        "virginCostInrPerT": 700
+      },
+      {
+        "tag": "foundry_slag",
+        "label": "Foundry slag (aggregate)",
+        "maxTpy": 1500,
+        "virginCostInrPerT": 650
+      }
+    ],
+    "implementedInterventionIds": [],
+    "consentToShare": true
+  },
+  {
+    "id": "vapi-01",
+    "name": "Arihant Dyestuffs Pvt. Ltd.",
+    "sector": "Chemicals — Dyes & intermediates",
+    "cluster": "Vapi, Gujarat",
+    "outputTonnesPerMonth": 900,
+    "totalCo2eTpy": 14800,
+    "totalEnergyMwhPerYear": 22000,
+    "totalWasteTpy": 1900,
+    "circularityRatio": 0.14,
+    "dataSource": "synthetic",
+    "nodes": [
+      {
+        "id": "vapi-01:boiler",
+        "label": "Steam Boiler",
+        "kind": "boiler",
+        "position": [
+          -2,
+          0,
+          -3
+        ],
+        "scale": [
+          4,
+          3,
+          2.6
+        ],
+        "co2eTpy": 6216,
+        "shareOfTotal": 0.42,
+        "benchmarkIntensity": 240,
+        "actualIntensity": 331,
+        "severity": "crit",
+        "confidence": "medium",
+        "rootCause": "Boiler efficiency 35 pts below benchmark; no economiser, poor condensate return.",
+        "interventions": [
+          {
+            "id": "vapi-01:boiler:boiler-economiser",
+            "title": "Economiser + condensate recovery on steam boiler",
+            "category": "heat-recovery",
+            "capexInr": 7000000,
+            "annualSavingInr": 1790400,
+            "co2ReductionTpy": 746,
+            "paybackMonths": 47,
+            "confidence": "high",
+            "description": "Recover flue-gas and condensate heat into feedwater; 8–15 % fuel saving."
+          },
+          {
+            "id": "vapi-01:boiler:boiler-biomass",
+            "title": "Co-fire agri-residue briquettes (waste biomass) in boiler",
+            "category": "material-substitution",
+            "capexInr": 8750000,
+            "annualSavingInr": 1678500,
+            "co2ReductionTpy": 1865,
+            "paybackMonths": 63,
+            "confidence": "medium",
+            "description": "Substitute a share of coal/gas with locally available agri-residue briquettes.",
+            "circularityGainPct": 0.05
+          }
+        ]
+      },
+      {
+        "id": "vapi-01:reactor",
+        "label": "Reactor Heating",
+        "kind": "furnace",
+        "position": [
+          3.5,
+          0,
+          -2.5
+        ],
+        "scale": [
+          2.6,
+          2.4,
+          2.6
+        ],
+        "co2eTpy": 2960,
+        "shareOfTotal": 0.2,
+        "benchmarkIntensity": 110,
+        "actualIntensity": 126,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Thermic-fluid heater cycling on batch loads.",
+        "interventions": [
+          {
+            "id": "vapi-01:reactor:furnace-regen",
+            "title": "Regenerative burners / recuperator on furnace",
+            "category": "heat-recovery",
+            "capexInr": 7696000,
+            "annualSavingInr": 1119300,
+            "co2ReductionTpy": 533,
+            "paybackMonths": 83,
+            "confidence": "high",
+            "description": "Preheat combustion air from flue gas; typical 15–25 % fuel saving on batch furnaces."
+          },
+          {
+            "id": "vapi-01:reactor:furnace-scrap",
+            "title": "Higher in-house scrap return + charge preheating",
+            "category": "recycling-loop",
+            "capexInr": 1332000,
+            "annualSavingInr": 734700,
+            "co2ReductionTpy": 237,
+            "paybackMonths": 22,
+            "confidence": "medium",
+            "description": "Close the loop on runners/risers and preheat charge with exhaust before melting.",
+            "circularityGainPct": 0.06
+          }
+        ]
+      },
+      {
+        "id": "vapi-01:column",
+        "label": "Distillation Column",
+        "kind": "generic",
+        "position": [
+          -0.5,
+          0,
+          1.5
+        ],
+        "scale": [
+          6,
+          1.5,
+          1.6
+        ],
+        "co2eTpy": 2664,
+        "shareOfTotal": 0.18,
+        "benchmarkIntensity": 95,
+        "actualIntensity": 135,
+        "severity": "crit",
+        "confidence": "medium",
+        "rootCause": "Solvent losses to incineration rather than recovery.",
+        "interventions": [
+          {
+            "id": "vapi-01:column:solvent-recovery",
+            "title": "Solvent recovery still (closed loop)",
+            "category": "recycling-loop",
+            "capexInr": 3463200,
+            "annualSavingInr": 1816600,
+            "co2ReductionTpy": 293,
+            "paybackMonths": 23,
+            "confidence": "high",
+            "description": "Distil and reuse spent solvent instead of incinerating or sending to TSDF.",
+            "circularityGainPct": 0.08
+          }
+        ]
+      },
+      {
+        "id": "vapi-01:compressor",
+        "label": "Compressor House",
+        "kind": "compressor",
+        "position": [
+          5,
+          0,
+          2.6
+        ],
+        "scale": [
+          3,
+          1.6,
+          2.6
+        ],
+        "co2eTpy": 1184,
+        "shareOfTotal": 0.08,
+        "benchmarkIntensity": 30,
+        "actualIntensity": 31,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Compressed-air near benchmark.",
+        "interventions": [
+          {
+            "id": "vapi-01:compressor:air-leak",
+            "title": "Ultrasonic compressed-air leak audit (routine)",
+            "category": "process-change",
+            "capexInr": 71040,
+            "annualSavingInr": 173900,
+            "co2ReductionTpy": 47,
+            "paybackMonths": 5,
+            "confidence": "medium",
+            "description": "Quarterly leak detection recovers 5–8 % of losses even in well-run systems."
+          },
+          {
+            "id": "vapi-01:compressor:air-vsd",
+            "title": "VSD retrofit on lead compressor",
+            "category": "process-change",
+            "capexInr": 651200,
+            "annualSavingInr": 525400,
+            "co2ReductionTpy": 142,
+            "paybackMonths": 15,
+            "confidence": "high",
+            "description": "Match compressor output to demand instead of load/unload cycling."
+          }
+        ]
+      },
+      {
+        "id": "vapi-01:etp",
+        "label": "Effluent Treatment Plant",
+        "kind": "effluent",
+        "position": [
+          -5.4,
+          0,
+          3.4
+        ],
+        "scale": [
+          3.6,
+          1.4,
+          3.2
+        ],
+        "co2eTpy": 1776,
+        "shareOfTotal": 0.12,
+        "benchmarkIntensity": 60,
+        "actualIntensity": 90,
+        "severity": "crit",
+        "confidence": "medium",
+        "rootCause": "High-COD effluent aerobically treated with no biogas capture.",
+        "interventions": [
+          {
+            "id": "vapi-01:etp:etp-sludge-symbiosis",
+            "title": "Waste-to-input: ETP sludge → nearby brick/block units",
+            "category": "waste-to-input",
+            "capexInr": 230880,
+            "annualSavingInr": 887500,
+            "co2ReductionTpy": 355,
+            "paybackMonths": 3,
+            "confidence": "low",
+            "description": "Dewatered sludge substitutes part of the raw material at nearby brick/block units.",
+            "circularityGainPct": 0.09
+          },
+          {
+            "id": "vapi-01:etp:etp-biogas",
+            "title": "Anaerobic pre-treatment with biogas capture",
+            "category": "waste-to-input",
+            "capexInr": 2841600,
+            "annualSavingInr": 799200,
+            "co2ReductionTpy": 444,
+            "paybackMonths": 43,
+            "confidence": "medium",
+            "description": "Capture methane from high-COD effluent and use it in the boiler.",
+            "circularityGainPct": 0.06
+          },
+          {
+            "id": "vapi-01:etp:etp-water-reuse",
+            "title": "Tertiary treatment + process water reuse",
+            "category": "recycling-loop",
+            "capexInr": 1687200,
+            "annualSavingInr": 298200,
+            "co2ReductionTpy": 142,
+            "paybackMonths": 68,
+            "confidence": "medium",
+            "description": "Reuse treated effluent for non-critical process water; cuts fresh-water pumping.",
+            "circularityGainPct": 0.04
+          }
+        ]
+      }
+    ],
+    "lat": 20.385,
+    "lon": 72.92,
+    "wasteStreams": [
+      {
+        "tag": "spent_solvent",
+        "label": "Spent solvent (mixed)",
+        "tpy": 380,
+        "form": "liquid",
+        "disposalCostInrPerT": 9000
+      },
+      {
+        "tag": "waste_heat_steam",
+        "label": "Low-pressure exhaust steam",
+        "tpy": 5200,
+        "form": "heat",
+        "disposalCostInrPerT": 0
+      }
+    ],
+    "acceptedInputs": [],
+    "implementedInterventionIds": [],
+    "consentToShare": true
+  },
+  {
+    "id": "vapi-02",
+    "name": "Nirmal Organics",
+    "sector": "Chemicals — Specialty chemicals",
+    "cluster": "Vapi, Gujarat",
+    "outputTonnesPerMonth": 1400,
+    "totalCo2eTpy": 12300,
+    "totalEnergyMwhPerYear": 19800,
+    "totalWasteTpy": 1100,
+    "circularityRatio": 0.24,
+    "dataSource": "synthetic",
+    "nodes": [
+      {
+        "id": "vapi-02:boiler",
+        "label": "Steam Boiler",
+        "kind": "boiler",
+        "position": [
+          -2,
+          0,
+          -3
+        ],
+        "scale": [
+          4,
+          3,
+          2.6
+        ],
+        "co2eTpy": 5166,
+        "shareOfTotal": 0.42,
+        "benchmarkIntensity": 240,
+        "actualIntensity": 269,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Boiler efficiency 28 pts below benchmark; no economiser, poor condensate return.",
+        "interventions": [
+          {
+            "id": "vapi-02:boiler:boiler-economiser",
+            "title": "Economiser + condensate recovery on steam boiler",
+            "category": "heat-recovery",
+            "capexInr": 7000000,
+            "annualSavingInr": 1488000,
+            "co2ReductionTpy": 620,
+            "paybackMonths": 56,
+            "confidence": "high",
+            "description": "Recover flue-gas and condensate heat into feedwater; 8–15 % fuel saving."
+          },
+          {
+            "id": "vapi-02:boiler:boiler-biomass",
+            "title": "Co-fire agri-residue briquettes (waste biomass) in boiler",
+            "category": "material-substitution",
+            "capexInr": 8750000,
+            "annualSavingInr": 1395000,
+            "co2ReductionTpy": 1550,
+            "paybackMonths": 75,
+            "confidence": "medium",
+            "description": "Substitute a share of coal/gas with locally available agri-residue briquettes.",
+            "circularityGainPct": 0.05
+          }
+        ]
+      },
+      {
+        "id": "vapi-02:reactor",
+        "label": "Reactor Heating",
+        "kind": "furnace",
+        "position": [
+          3.5,
+          0,
+          -2.5
+        ],
+        "scale": [
+          2.6,
+          2.4,
+          2.6
+        ],
+        "co2eTpy": 2460,
+        "shareOfTotal": 0.2,
+        "benchmarkIntensity": 110,
+        "actualIntensity": 117,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Thermic-fluid heater cycling on batch loads.",
+        "interventions": [
+          {
+            "id": "vapi-02:reactor:furnace-regen",
+            "title": "Regenerative burners / recuperator on furnace",
+            "category": "heat-recovery",
+            "capexInr": 6396000,
+            "annualSavingInr": 930300,
+            "co2ReductionTpy": 443,
+            "paybackMonths": 83,
+            "confidence": "high",
+            "description": "Preheat combustion air from flue gas; typical 15–25 % fuel saving on batch furnaces."
+          },
+          {
+            "id": "vapi-02:reactor:furnace-scrap",
+            "title": "Higher in-house scrap return + charge preheating",
+            "category": "recycling-loop",
+            "capexInr": 1107000,
+            "annualSavingInr": 610700,
+            "co2ReductionTpy": 197,
+            "paybackMonths": 22,
+            "confidence": "medium",
+            "description": "Close the loop on runners/risers and preheat charge with exhaust before melting.",
+            "circularityGainPct": 0.06
+          }
+        ]
+      },
+      {
+        "id": "vapi-02:column",
+        "label": "Distillation Column",
+        "kind": "generic",
+        "position": [
+          -0.5,
+          0,
+          1.5
+        ],
+        "scale": [
+          6,
+          1.5,
+          1.6
+        ],
+        "co2eTpy": 2214,
+        "shareOfTotal": 0.18,
+        "benchmarkIntensity": 95,
+        "actualIntensity": 103,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Solvent losses to incineration rather than recovery.",
+        "interventions": [
+          {
+            "id": "vapi-02:column:solvent-recovery",
+            "title": "Solvent recovery still (closed loop)",
+            "category": "recycling-loop",
+            "capexInr": 2878200,
+            "annualSavingInr": 1512800,
+            "co2ReductionTpy": 244,
+            "paybackMonths": 23,
+            "confidence": "high",
+            "description": "Distil and reuse spent solvent instead of incinerating or sending to TSDF.",
+            "circularityGainPct": 0.08
+          }
+        ]
+      },
+      {
+        "id": "vapi-02:compressor",
+        "label": "Compressor House",
+        "kind": "compressor",
+        "position": [
+          5,
+          0,
+          2.6
+        ],
+        "scale": [
+          3,
+          1.6,
+          2.6
+        ],
+        "co2eTpy": 984,
+        "shareOfTotal": 0.08,
+        "benchmarkIntensity": 30,
+        "actualIntensity": 29,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Compressed-air near benchmark.",
+        "interventions": [
+          {
+            "id": "vapi-02:compressor:air-leak",
+            "title": "Ultrasonic compressed-air leak audit (routine)",
+            "category": "process-change",
+            "capexInr": 59040,
+            "annualSavingInr": 144300,
+            "co2ReductionTpy": 39,
+            "paybackMonths": 5,
+            "confidence": "medium",
+            "description": "Quarterly leak detection recovers 5–8 % of losses even in well-run systems."
+          },
+          {
+            "id": "vapi-02:compressor:air-vsd",
+            "title": "VSD retrofit on lead compressor",
+            "category": "process-change",
+            "capexInr": 541200,
+            "annualSavingInr": 436600,
+            "co2ReductionTpy": 118,
+            "paybackMonths": 15,
+            "confidence": "high",
+            "description": "Match compressor output to demand instead of load/unload cycling."
+          }
+        ]
+      },
+      {
+        "id": "vapi-02:etp",
+        "label": "Effluent Treatment Plant",
+        "kind": "effluent",
+        "position": [
+          -5.4,
+          0,
+          3.4
+        ],
+        "scale": [
+          3.6,
+          1.4,
+          3.2
+        ],
+        "co2eTpy": 1476,
+        "shareOfTotal": 0.12,
+        "benchmarkIntensity": 60,
+        "actualIntensity": 72,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "High-COD effluent aerobically treated with no biogas capture.",
+        "interventions": [
+          {
+            "id": "vapi-02:etp:etp-sludge-symbiosis",
+            "title": "Waste-to-input: ETP sludge → nearby brick/block units",
+            "category": "waste-to-input",
+            "capexInr": 191880,
+            "annualSavingInr": 737500,
+            "co2ReductionTpy": 295,
+            "paybackMonths": 3,
+            "confidence": "low",
+            "description": "Dewatered sludge substitutes part of the raw material at nearby brick/block units.",
+            "circularityGainPct": 0.09
+          },
+          {
+            "id": "vapi-02:etp:etp-biogas",
+            "title": "Anaerobic pre-treatment with biogas capture",
+            "category": "waste-to-input",
+            "capexInr": 2361600,
+            "annualSavingInr": 664200,
+            "co2ReductionTpy": 369,
+            "paybackMonths": 43,
+            "confidence": "medium",
+            "description": "Capture methane from high-COD effluent and use it in the boiler.",
+            "circularityGainPct": 0.06
+          },
+          {
+            "id": "vapi-02:etp:etp-water-reuse",
+            "title": "Tertiary treatment + process water reuse",
+            "category": "recycling-loop",
+            "capexInr": 1402200,
+            "annualSavingInr": 247800,
+            "co2ReductionTpy": 118,
+            "paybackMonths": 68,
+            "confidence": "medium",
+            "description": "Reuse treated effluent for non-critical process water; cuts fresh-water pumping.",
+            "circularityGainPct": 0.04
+          }
+        ]
+      }
+    ],
+    "lat": 20.35,
+    "lon": 72.885,
+    "wasteStreams": [
+      {
+        "tag": "spent_solvent",
+        "label": "Spent solvent (toluene-rich)",
+        "tpy": 210,
+        "form": "liquid",
+        "disposalCostInrPerT": 9000
+      }
+    ],
+    "acceptedInputs": [
+      {
+        "tag": "spent_solvent",
+        "label": "Solvent for recovery still",
+        "maxTpy": 800,
+        "virginCostInrPerT": 62000
+      },
+      {
+        "tag": "waste_heat_steam",
+        "label": "LP steam for reboilers",
+        "maxTpy": 9000,
+        "virginCostInrPerT": 1800
+      }
+    ],
+    "implementedInterventionIds": [
+      "vapi-02:boiler:boiler-economiser",
+      "vapi-02:column:solvent-recovery"
+    ],
+    "consentToShare": true
+  },
+  {
+    "id": "vapi-03",
+    "name": "Shree Pigments",
+    "sector": "Chemicals — Pigments",
+    "cluster": "Vapi, Gujarat",
+    "outputTonnesPerMonth": 600,
+    "totalCo2eTpy": 8900,
+    "totalEnergyMwhPerYear": 13400,
+    "totalWasteTpy": 1400,
+    "circularityRatio": 0.11,
+    "dataSource": "synthetic",
+    "nodes": [
+      {
+        "id": "vapi-03:boiler",
+        "label": "Steam Boiler",
+        "kind": "boiler",
+        "position": [
+          -2,
+          0,
+          -3
+        ],
+        "scale": [
+          4,
+          3,
+          2.6
+        ],
+        "co2eTpy": 3738,
+        "shareOfTotal": 0.42,
+        "benchmarkIntensity": 240,
+        "actualIntensity": 305,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Boiler efficiency 32 pts below benchmark; no economiser, poor condensate return.",
+        "interventions": [
+          {
+            "id": "vapi-03:boiler:boiler-economiser",
+            "title": "Economiser + condensate recovery on steam boiler",
+            "category": "heat-recovery",
+            "capexInr": 5233200,
+            "annualSavingInr": 1077600,
+            "co2ReductionTpy": 449,
+            "paybackMonths": 58,
+            "confidence": "high",
+            "description": "Recover flue-gas and condensate heat into feedwater; 8–15 % fuel saving."
+          },
+          {
+            "id": "vapi-03:boiler:boiler-biomass",
+            "title": "Co-fire agri-residue briquettes (waste biomass) in boiler",
+            "category": "material-substitution",
+            "capexInr": 6541500,
+            "annualSavingInr": 1008900,
+            "co2ReductionTpy": 1121,
+            "paybackMonths": 78,
+            "confidence": "medium",
+            "description": "Substitute a share of coal/gas with locally available agri-residue briquettes.",
+            "circularityGainPct": 0.05
+          }
+        ]
+      },
+      {
+        "id": "vapi-03:reactor",
+        "label": "Reactor Heating",
+        "kind": "furnace",
+        "position": [
+          3.5,
+          0,
+          -2.5
+        ],
+        "scale": [
+          2.6,
+          2.4,
+          2.6
+        ],
+        "co2eTpy": 1780,
+        "shareOfTotal": 0.2,
+        "benchmarkIntensity": 110,
+        "actualIntensity": 132,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Thermic-fluid heater cycling on batch loads.",
+        "interventions": [
+          {
+            "id": "vapi-03:reactor:furnace-regen",
+            "title": "Regenerative burners / recuperator on furnace",
+            "category": "heat-recovery",
+            "capexInr": 4628000,
+            "annualSavingInr": 672000,
+            "co2ReductionTpy": 320,
+            "paybackMonths": 83,
+            "confidence": "high",
+            "description": "Preheat combustion air from flue gas; typical 15–25 % fuel saving on batch furnaces."
+          },
+          {
+            "id": "vapi-03:reactor:furnace-scrap",
+            "title": "Higher in-house scrap return + charge preheating",
+            "category": "recycling-loop",
+            "capexInr": 801000,
+            "annualSavingInr": 440200,
+            "co2ReductionTpy": 142,
+            "paybackMonths": 22,
+            "confidence": "medium",
+            "description": "Close the loop on runners/risers and preheat charge with exhaust before melting.",
+            "circularityGainPct": 0.06
+          }
+        ]
+      },
+      {
+        "id": "vapi-03:column",
+        "label": "Distillation Column",
+        "kind": "generic",
+        "position": [
+          -0.5,
+          0,
+          1.5
+        ],
+        "scale": [
+          6,
+          1.5,
+          1.6
+        ],
+        "co2eTpy": 1602,
+        "shareOfTotal": 0.18,
+        "benchmarkIntensity": 95,
+        "actualIntensity": 109,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Solvent losses to incineration rather than recovery.",
+        "interventions": [
+          {
+            "id": "vapi-03:column:solvent-recovery",
+            "title": "Solvent recovery still (closed loop)",
+            "category": "recycling-loop",
+            "capexInr": 2082600,
+            "annualSavingInr": 1091200,
+            "co2ReductionTpy": 176,
+            "paybackMonths": 23,
+            "confidence": "high",
+            "description": "Distil and reuse spent solvent instead of incinerating or sending to TSDF.",
+            "circularityGainPct": 0.08
+          }
+        ]
+      },
+      {
+        "id": "vapi-03:compressor",
+        "label": "Compressor House",
+        "kind": "compressor",
+        "position": [
+          5,
+          0,
+          2.6
+        ],
+        "scale": [
+          3,
+          1.6,
+          2.6
+        ],
+        "co2eTpy": 712,
+        "shareOfTotal": 0.08,
+        "benchmarkIntensity": 30,
+        "actualIntensity": 32,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Compressed-air near benchmark.",
+        "interventions": [
+          {
+            "id": "vapi-03:compressor:air-leak",
+            "title": "Ultrasonic compressed-air leak audit (routine)",
+            "category": "process-change",
+            "capexInr": 42720,
+            "annualSavingInr": 103600,
+            "co2ReductionTpy": 28,
+            "paybackMonths": 5,
+            "confidence": "medium",
+            "description": "Quarterly leak detection recovers 5–8 % of losses even in well-run systems."
+          },
+          {
+            "id": "vapi-03:compressor:air-vsd",
+            "title": "VSD retrofit on lead compressor",
+            "category": "process-change",
+            "capexInr": 391600,
+            "annualSavingInr": 314500,
+            "co2ReductionTpy": 85,
+            "paybackMonths": 15,
+            "confidence": "high",
+            "description": "Match compressor output to demand instead of load/unload cycling."
+          }
+        ]
+      },
+      {
+        "id": "vapi-03:etp",
+        "label": "Effluent Treatment Plant",
+        "kind": "effluent",
+        "position": [
+          -5.4,
+          0,
+          3.4
+        ],
+        "scale": [
+          3.6,
+          1.4,
+          3.2
+        ],
+        "co2eTpy": 1068,
+        "shareOfTotal": 0.12,
+        "benchmarkIntensity": 60,
+        "actualIntensity": 82,
+        "severity": "crit",
+        "confidence": "medium",
+        "rootCause": "High-COD effluent aerobically treated with no biogas capture.",
+        "interventions": [
+          {
+            "id": "vapi-03:etp:etp-sludge-symbiosis",
+            "title": "Waste-to-input: ETP sludge → nearby brick/block units",
+            "category": "waste-to-input",
+            "capexInr": 138840,
+            "annualSavingInr": 535000,
+            "co2ReductionTpy": 214,
+            "paybackMonths": 3,
+            "confidence": "low",
+            "description": "Dewatered sludge substitutes part of the raw material at nearby brick/block units.",
+            "circularityGainPct": 0.09
+          },
+          {
+            "id": "vapi-03:etp:etp-biogas",
+            "title": "Anaerobic pre-treatment with biogas capture",
+            "category": "waste-to-input",
+            "capexInr": 1708800,
+            "annualSavingInr": 480600,
+            "co2ReductionTpy": 267,
+            "paybackMonths": 43,
+            "confidence": "medium",
+            "description": "Capture methane from high-COD effluent and use it in the boiler.",
+            "circularityGainPct": 0.06
+          },
+          {
+            "id": "vapi-03:etp:etp-water-reuse",
+            "title": "Tertiary treatment + process water reuse",
+            "category": "recycling-loop",
+            "capexInr": 1014600,
+            "annualSavingInr": 178500,
+            "co2ReductionTpy": 85,
+            "paybackMonths": 68,
+            "confidence": "medium",
+            "description": "Reuse treated effluent for non-critical process water; cuts fresh-water pumping.",
+            "circularityGainPct": 0.04
+          }
+        ]
+      }
+    ],
+    "lat": 20.400000000000002,
+    "lon": 72.87,
+    "wasteStreams": [
+      {
+        "tag": "spent_solvent",
+        "label": "Spent solvent",
+        "tpy": 150,
+        "form": "liquid",
+        "disposalCostInrPerT": 9000
+      }
+    ],
+    "acceptedInputs": [],
+    "implementedInterventionIds": [],
+    "consentToShare": false
+  },
+  {
+    "id": "ankleshwar-01",
+    "name": "Bharuch Fine Chem",
+    "sector": "Chemicals — Agro-chem intermediates",
+    "cluster": "Ankleshwar, Gujarat",
+    "outputTonnesPerMonth": 1100,
+    "totalCo2eTpy": 13600,
+    "totalEnergyMwhPerYear": 21500,
+    "totalWasteTpy": 1600,
+    "circularityRatio": 0.19,
+    "dataSource": "synthetic",
+    "nodes": [
+      {
+        "id": "ankleshwar-01:boiler",
+        "label": "Steam Boiler",
+        "kind": "boiler",
+        "position": [
+          -2,
+          0,
+          -3
+        ],
+        "scale": [
+          4,
+          3,
+          2.6
+        ],
+        "co2eTpy": 5712,
+        "shareOfTotal": 0.42,
+        "benchmarkIntensity": 240,
+        "actualIntensity": 298,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Boiler efficiency 31 pts below benchmark; no economiser, poor condensate return.",
+        "interventions": [
+          {
+            "id": "ankleshwar-01:boiler:boiler-economiser",
+            "title": "Economiser + condensate recovery on steam boiler",
+            "category": "heat-recovery",
+            "capexInr": 7000000,
+            "annualSavingInr": 1644000,
+            "co2ReductionTpy": 685,
+            "paybackMonths": 51,
+            "confidence": "high",
+            "description": "Recover flue-gas and condensate heat into feedwater; 8–15 % fuel saving."
+          },
+          {
+            "id": "ankleshwar-01:boiler:boiler-biomass",
+            "title": "Co-fire agri-residue briquettes (waste biomass) in boiler",
+            "category": "material-substitution",
+            "capexInr": 8750000,
+            "annualSavingInr": 1542600,
+            "co2ReductionTpy": 1714,
+            "paybackMonths": 68,
+            "confidence": "medium",
+            "description": "Substitute a share of coal/gas with locally available agri-residue briquettes.",
+            "circularityGainPct": 0.05
+          }
+        ]
+      },
+      {
+        "id": "ankleshwar-01:reactor",
+        "label": "Reactor Heating",
+        "kind": "furnace",
+        "position": [
+          3.5,
+          0,
+          -2.5
+        ],
+        "scale": [
+          2.6,
+          2.4,
+          2.6
+        ],
+        "co2eTpy": 2720,
+        "shareOfTotal": 0.2,
+        "benchmarkIntensity": 110,
+        "actualIntensity": 121,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Thermic-fluid heater cycling on batch loads.",
+        "interventions": [
+          {
+            "id": "ankleshwar-01:reactor:furnace-regen",
+            "title": "Regenerative burners / recuperator on furnace",
+            "category": "heat-recovery",
+            "capexInr": 7072000,
+            "annualSavingInr": 1029000,
+            "co2ReductionTpy": 490,
+            "paybackMonths": 82,
+            "confidence": "high",
+            "description": "Preheat combustion air from flue gas; typical 15–25 % fuel saving on batch furnaces."
+          },
+          {
+            "id": "ankleshwar-01:reactor:furnace-scrap",
+            "title": "Higher in-house scrap return + charge preheating",
+            "category": "recycling-loop",
+            "capexInr": 1224000,
+            "annualSavingInr": 675800,
+            "co2ReductionTpy": 218,
+            "paybackMonths": 22,
+            "confidence": "medium",
+            "description": "Close the loop on runners/risers and preheat charge with exhaust before melting.",
+            "circularityGainPct": 0.06
+          }
+        ]
+      },
+      {
+        "id": "ankleshwar-01:column",
+        "label": "Distillation Column",
+        "kind": "generic",
+        "position": [
+          -0.5,
+          0,
+          1.5
+        ],
+        "scale": [
+          6,
+          1.5,
+          1.6
+        ],
+        "co2eTpy": 2448,
+        "shareOfTotal": 0.18,
+        "benchmarkIntensity": 95,
+        "actualIntensity": 124,
+        "severity": "crit",
+        "confidence": "medium",
+        "rootCause": "Solvent losses to incineration rather than recovery.",
+        "interventions": [
+          {
+            "id": "ankleshwar-01:column:solvent-recovery",
+            "title": "Solvent recovery still (closed loop)",
+            "category": "recycling-loop",
+            "capexInr": 3182400,
+            "annualSavingInr": 1667800,
+            "co2ReductionTpy": 269,
+            "paybackMonths": 23,
+            "confidence": "high",
+            "description": "Distil and reuse spent solvent instead of incinerating or sending to TSDF.",
+            "circularityGainPct": 0.08
+          }
+        ]
+      },
+      {
+        "id": "ankleshwar-01:compressor",
+        "label": "Compressor House",
+        "kind": "compressor",
+        "position": [
+          5,
+          0,
+          2.6
+        ],
+        "scale": [
+          3,
+          1.6,
+          2.6
+        ],
+        "co2eTpy": 1088,
+        "shareOfTotal": 0.08,
+        "benchmarkIntensity": 30,
+        "actualIntensity": 30,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Compressed-air near benchmark.",
+        "interventions": [
+          {
+            "id": "ankleshwar-01:compressor:air-leak",
+            "title": "Ultrasonic compressed-air leak audit (routine)",
+            "category": "process-change",
+            "capexInr": 65280,
+            "annualSavingInr": 162800,
+            "co2ReductionTpy": 44,
+            "paybackMonths": 5,
+            "confidence": "medium",
+            "description": "Quarterly leak detection recovers 5–8 % of losses even in well-run systems."
+          },
+          {
+            "id": "ankleshwar-01:compressor:air-vsd",
+            "title": "VSD retrofit on lead compressor",
+            "category": "process-change",
+            "capexInr": 598400,
+            "annualSavingInr": 484700,
+            "co2ReductionTpy": 131,
+            "paybackMonths": 15,
+            "confidence": "high",
+            "description": "Match compressor output to demand instead of load/unload cycling."
+          }
+        ]
+      },
+      {
+        "id": "ankleshwar-01:etp",
+        "label": "Effluent Treatment Plant",
+        "kind": "effluent",
+        "position": [
+          -5.4,
+          0,
+          3.4
+        ],
+        "scale": [
+          3.6,
+          1.4,
+          3.2
+        ],
+        "co2eTpy": 1632,
+        "shareOfTotal": 0.12,
+        "benchmarkIntensity": 60,
+        "actualIntensity": 77,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "High-COD effluent aerobically treated with no biogas capture.",
+        "interventions": [
+          {
+            "id": "ankleshwar-01:etp:etp-sludge-symbiosis",
+            "title": "Waste-to-input: ETP sludge → nearby brick/block units",
+            "category": "waste-to-input",
+            "capexInr": 212160,
+            "annualSavingInr": 815000,
+            "co2ReductionTpy": 326,
+            "paybackMonths": 3,
+            "confidence": "low",
+            "description": "Dewatered sludge substitutes part of the raw material at nearby brick/block units.",
+            "circularityGainPct": 0.09
+          },
+          {
+            "id": "ankleshwar-01:etp:etp-biogas",
+            "title": "Anaerobic pre-treatment with biogas capture",
+            "category": "waste-to-input",
+            "capexInr": 2611200,
+            "annualSavingInr": 734400,
+            "co2ReductionTpy": 408,
+            "paybackMonths": 43,
+            "confidence": "medium",
+            "description": "Capture methane from high-COD effluent and use it in the boiler.",
+            "circularityGainPct": 0.06
+          },
+          {
+            "id": "ankleshwar-01:etp:etp-water-reuse",
+            "title": "Tertiary treatment + process water reuse",
+            "category": "recycling-loop",
+            "capexInr": 1550400,
+            "annualSavingInr": 275100,
+            "co2ReductionTpy": 131,
+            "paybackMonths": 68,
+            "confidence": "medium",
+            "description": "Reuse treated effluent for non-critical process water; cuts fresh-water pumping.",
+            "circularityGainPct": 0.04
+          }
+        ]
+      }
+    ],
+    "lat": 21.64,
+    "lon": 73.02,
+    "wasteStreams": [
+      {
+        "tag": "spent_solvent",
+        "label": "Spent solvent",
+        "tpy": 300,
+        "form": "liquid",
+        "disposalCostInrPerT": 9000
+      }
+    ],
+    "acceptedInputs": [
+      {
+        "tag": "spent_solvent",
+        "label": "Solvent for recovery",
+        "maxTpy": 500,
+        "virginCostInrPerT": 60000
+      }
+    ],
+    "implementedInterventionIds": [
+      "ankleshwar-01:compressor:air-vsd"
+    ],
+    "consentToShare": true
+  },
+  {
+    "id": "surat-01",
+    "name": "Laxmi Dyeing & Printing Mills",
+    "sector": "Textiles — Dyeing & printing",
+    "cluster": "Surat, Gujarat",
+    "outputTonnesPerMonth": 1800,
+    "totalCo2eTpy": 16200,
+    "totalEnergyMwhPerYear": 24800,
+    "totalWasteTpy": 2100,
+    "circularityRatio": 0.16,
+    "dataSource": "synthetic",
+    "nodes": [
+      {
+        "id": "surat-01:boiler",
+        "label": "Thermic Fluid Heater / Boiler",
+        "kind": "boiler",
+        "position": [
+          -2,
+          0,
+          -3
+        ],
+        "scale": [
+          4,
+          3,
+          2.6
+        ],
+        "co2eTpy": 7290,
+        "shareOfTotal": 0.45,
+        "benchmarkIntensity": 150,
+        "actualIntensity": 204,
+        "severity": "crit",
+        "confidence": "medium",
+        "rootCause": "Coal-fired heater 34 pts below benchmark efficiency; no flue-gas recovery.",
+        "interventions": [
+          {
+            "id": "surat-01:boiler:boiler-economiser",
+            "title": "Economiser + condensate recovery on steam boiler",
+            "category": "heat-recovery",
+            "capexInr": 7000000,
+            "annualSavingInr": 2100000,
+            "co2ReductionTpy": 875,
+            "paybackMonths": 40,
+            "confidence": "high",
+            "description": "Recover flue-gas and condensate heat into feedwater; 8–15 % fuel saving."
+          },
+          {
+            "id": "surat-01:boiler:boiler-biomass",
+            "title": "Co-fire agri-residue briquettes (waste biomass) in boiler",
+            "category": "material-substitution",
+            "capexInr": 8750000,
+            "annualSavingInr": 1968300,
+            "co2ReductionTpy": 2187,
+            "paybackMonths": 53,
+            "confidence": "medium",
+            "description": "Substitute a share of coal/gas with locally available agri-residue briquettes.",
+            "circularityGainPct": 0.05
+          }
+        ]
+      },
+      {
+        "id": "surat-01:stenter",
+        "label": "Stenter (Drying)",
+        "kind": "dryer",
+        "position": [
+          4.8,
+          0,
+          -2.6
+        ],
+        "scale": [
+          2.4,
+          5.2,
+          2.4
+        ],
+        "co2eTpy": 4050,
+        "shareOfTotal": 0.25,
+        "benchmarkIntensity": 80,
+        "actualIntensity": 94,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Stenter exhaust not recirculated; over-drying on some qualities.",
+        "interventions": [
+          {
+            "id": "surat-01:stenter:dryer-moisture",
+            "title": "Inline moisture / density control on dryer feed",
+            "category": "process-change",
+            "capexInr": 1863000,
+            "annualSavingInr": 619150,
+            "co2ReductionTpy": 203,
+            "paybackMonths": 36,
+            "confidence": "medium",
+            "description": "Tighten feed consistency to cut excess evaporation load."
+          },
+          {
+            "id": "surat-01:stenter:dryer-exhaust",
+            "title": "Exhaust-air recirculation on dryer / stenter",
+            "category": "heat-recovery",
+            "capexInr": 3240000,
+            "annualSavingInr": 931500,
+            "co2ReductionTpy": 405,
+            "paybackMonths": 42,
+            "confidence": "high",
+            "description": "Recirculate part of the hot exhaust; standard on stenters and spray dryers."
+          }
+        ]
+      },
+      {
+        "id": "surat-01:dyeing",
+        "label": "Dyeing Line",
+        "kind": "generic",
+        "position": [
+          -0.8,
+          0,
+          1.4
+        ],
+        "scale": [
+          7,
+          1.4,
+          1.6
+        ],
+        "co2eTpy": 2430,
+        "shareOfTotal": 0.15,
+        "benchmarkIntensity": 50,
+        "actualIntensity": 61,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Single-use dye baths; caustic not recovered.",
+        "interventions": [
+          {
+            "id": "surat-01:dyeing:dye-reuse",
+            "title": "Dye-bath reuse + caustic recovery",
+            "category": "recycling-loop",
+            "capexInr": 1701000,
+            "annualSavingInr": 897900,
+            "co2ReductionTpy": 219,
+            "paybackMonths": 23,
+            "confidence": "medium",
+            "description": "Reuse dye liquor for successive batches; recover caustic from mercerising.",
+            "circularityGainPct": 0.07
+          }
+        ]
+      },
+      {
+        "id": "surat-01:compressor",
+        "label": "Compressor House",
+        "kind": "compressor",
+        "position": [
+          5,
+          0,
+          2.6
+        ],
+        "scale": [
+          3,
+          1.6,
+          2.6
+        ],
+        "co2eTpy": 810,
+        "shareOfTotal": 0.05,
+        "benchmarkIntensity": 20,
+        "actualIntensity": 20,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Near benchmark.",
+        "interventions": [
+          {
+            "id": "surat-01:compressor:air-leak",
+            "title": "Ultrasonic compressed-air leak audit (routine)",
+            "category": "process-change",
+            "capexInr": 48600,
+            "annualSavingInr": 118400,
+            "co2ReductionTpy": 32,
+            "paybackMonths": 5,
+            "confidence": "medium",
+            "description": "Quarterly leak detection recovers 5–8 % of losses even in well-run systems."
+          },
+          {
+            "id": "surat-01:compressor:air-vsd",
+            "title": "VSD retrofit on lead compressor",
+            "category": "process-change",
+            "capexInr": 445500,
+            "annualSavingInr": 358900,
+            "co2ReductionTpy": 97,
+            "paybackMonths": 15,
+            "confidence": "high",
+            "description": "Match compressor output to demand instead of load/unload cycling."
+          }
+        ]
+      },
+      {
+        "id": "surat-01:etp",
+        "label": "Effluent Treatment Plant",
+        "kind": "effluent",
+        "position": [
+          -5.4,
+          0,
+          3.4
+        ],
+        "scale": [
+          3.6,
+          1.4,
+          3.2
+        ],
+        "co2eTpy": 1620,
+        "shareOfTotal": 0.1,
+        "benchmarkIntensity": 40,
+        "actualIntensity": 52,
+        "severity": "crit",
+        "confidence": "medium",
+        "rootCause": "Fresh water drawn for all process stages; no tertiary reuse.",
+        "interventions": [
+          {
+            "id": "surat-01:etp:etp-sludge-symbiosis",
+            "title": "Waste-to-input: ETP sludge → nearby brick/block units",
+            "category": "waste-to-input",
+            "capexInr": 210600,
+            "annualSavingInr": 810000,
+            "co2ReductionTpy": 324,
+            "paybackMonths": 3,
+            "confidence": "low",
+            "description": "Dewatered sludge substitutes part of the raw material at nearby brick/block units.",
+            "circularityGainPct": 0.09
+          },
+          {
+            "id": "surat-01:etp:etp-biogas",
+            "title": "Anaerobic pre-treatment with biogas capture",
+            "category": "waste-to-input",
+            "capexInr": 2592000,
+            "annualSavingInr": 729000,
+            "co2ReductionTpy": 405,
+            "paybackMonths": 43,
+            "confidence": "medium",
+            "description": "Capture methane from high-COD effluent and use it in the boiler.",
+            "circularityGainPct": 0.06
+          },
+          {
+            "id": "surat-01:etp:etp-water-reuse",
+            "title": "Tertiary treatment + process water reuse",
+            "category": "recycling-loop",
+            "capexInr": 1539000,
+            "annualSavingInr": 273000,
+            "co2ReductionTpy": 130,
+            "paybackMonths": 68,
+            "confidence": "medium",
+            "description": "Reuse treated effluent for non-critical process water; cuts fresh-water pumping.",
+            "circularityGainPct": 0.04
+          }
+        ]
+      }
+    ],
+    "lat": 21.19,
+    "lon": 72.86,
+    "wasteStreams": [
+      {
+        "tag": "textile_sludge",
+        "label": "ETP textile sludge",
+        "tpy": 700,
+        "form": "solid",
+        "disposalCostInrPerT": 2100
+      },
+      {
+        "tag": "cotton_waste",
+        "label": "Fibre / cutting waste",
+        "tpy": 260,
+        "form": "solid",
+        "disposalCostInrPerT": 800
+      }
+    ],
+    "acceptedInputs": [],
+    "implementedInterventionIds": [],
+    "consentToShare": true
+  },
+  {
+    "id": "surat-02",
+    "name": "Ambica Processors",
+    "sector": "Textiles — Processing house",
+    "cluster": "Surat, Gujarat",
+    "outputTonnesPerMonth": 1300,
+    "totalCo2eTpy": 10400,
+    "totalEnergyMwhPerYear": 16900,
+    "totalWasteTpy": 1500,
+    "circularityRatio": 0.22,
+    "dataSource": "synthetic",
+    "nodes": [
+      {
+        "id": "surat-02:boiler",
+        "label": "Thermic Fluid Heater / Boiler",
+        "kind": "boiler",
+        "position": [
+          -2,
+          0,
+          -3
+        ],
+        "scale": [
+          4,
+          3,
+          2.6
+        ],
+        "co2eTpy": 4680,
+        "shareOfTotal": 0.45,
+        "benchmarkIntensity": 150,
+        "actualIntensity": 171,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Coal-fired heater 28 pts below benchmark efficiency; no flue-gas recovery.",
+        "interventions": [
+          {
+            "id": "surat-02:boiler:boiler-economiser",
+            "title": "Economiser + condensate recovery on steam boiler",
+            "category": "heat-recovery",
+            "capexInr": 6552000,
+            "annualSavingInr": 1348800,
+            "co2ReductionTpy": 562,
+            "paybackMonths": 58,
+            "confidence": "high",
+            "description": "Recover flue-gas and condensate heat into feedwater; 8–15 % fuel saving."
+          },
+          {
+            "id": "surat-02:boiler:boiler-biomass",
+            "title": "Co-fire agri-residue briquettes (waste biomass) in boiler",
+            "category": "material-substitution",
+            "capexInr": 8190000,
+            "annualSavingInr": 1263600,
+            "co2ReductionTpy": 1404,
+            "paybackMonths": 78,
+            "confidence": "medium",
+            "description": "Substitute a share of coal/gas with locally available agri-residue briquettes.",
+            "circularityGainPct": 0.05
+          }
+        ]
+      },
+      {
+        "id": "surat-02:stenter",
+        "label": "Stenter (Drying)",
+        "kind": "dryer",
+        "position": [
+          4.8,
+          0,
+          -2.6
+        ],
+        "scale": [
+          2.4,
+          5.2,
+          2.4
+        ],
+        "co2eTpy": 2600,
+        "shareOfTotal": 0.25,
+        "benchmarkIntensity": 80,
+        "actualIntensity": 86,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Stenter exhaust not recirculated; over-drying on some qualities.",
+        "interventions": [
+          {
+            "id": "surat-02:stenter:dryer-moisture",
+            "title": "Inline moisture / density control on dryer feed",
+            "category": "process-change",
+            "capexInr": 1196000,
+            "annualSavingInr": 396500,
+            "co2ReductionTpy": 130,
+            "paybackMonths": 36,
+            "confidence": "medium",
+            "description": "Tighten feed consistency to cut excess evaporation load."
+          },
+          {
+            "id": "surat-02:stenter:dryer-exhaust",
+            "title": "Exhaust-air recirculation on dryer / stenter",
+            "category": "heat-recovery",
+            "capexInr": 2080000,
+            "annualSavingInr": 598000,
+            "co2ReductionTpy": 260,
+            "paybackMonths": 42,
+            "confidence": "high",
+            "description": "Recirculate part of the hot exhaust; standard on stenters and spray dryers."
+          }
+        ]
+      },
+      {
+        "id": "surat-02:dyeing",
+        "label": "Dyeing Line",
+        "kind": "generic",
+        "position": [
+          -0.8,
+          0,
+          1.4
+        ],
+        "scale": [
+          7,
+          1.4,
+          1.6
+        ],
+        "co2eTpy": 1560,
+        "shareOfTotal": 0.15,
+        "benchmarkIntensity": 50,
+        "actualIntensity": 55,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Single-use dye baths; caustic not recovered.",
+        "interventions": [
+          {
+            "id": "surat-02:dyeing:dye-reuse",
+            "title": "Dye-bath reuse + caustic recovery",
+            "category": "recycling-loop",
+            "capexInr": 1092000,
+            "annualSavingInr": 574000,
+            "co2ReductionTpy": 140,
+            "paybackMonths": 23,
+            "confidence": "medium",
+            "description": "Reuse dye liquor for successive batches; recover caustic from mercerising.",
+            "circularityGainPct": 0.07
+          }
+        ]
+      },
+      {
+        "id": "surat-02:compressor",
+        "label": "Compressor House",
+        "kind": "compressor",
+        "position": [
+          5,
+          0,
+          2.6
+        ],
+        "scale": [
+          3,
+          1.6,
+          2.6
+        ],
+        "co2eTpy": 520,
+        "shareOfTotal": 0.05,
+        "benchmarkIntensity": 20,
+        "actualIntensity": 20,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Near benchmark.",
+        "interventions": [
+          {
+            "id": "surat-02:compressor:air-leak",
+            "title": "Ultrasonic compressed-air leak audit (routine)",
+            "category": "process-change",
+            "capexInr": 42000,
+            "annualSavingInr": 77700,
+            "co2ReductionTpy": 21,
+            "paybackMonths": 6,
+            "confidence": "medium",
+            "description": "Quarterly leak detection recovers 5–8 % of losses even in well-run systems."
+          },
+          {
+            "id": "surat-02:compressor:air-vsd",
+            "title": "VSD retrofit on lead compressor",
+            "category": "process-change",
+            "capexInr": 385000,
+            "annualSavingInr": 229400,
+            "co2ReductionTpy": 62,
+            "paybackMonths": 20,
+            "confidence": "high",
+            "description": "Match compressor output to demand instead of load/unload cycling."
+          }
+        ]
+      },
+      {
+        "id": "surat-02:etp",
+        "label": "Effluent Treatment Plant",
+        "kind": "effluent",
+        "position": [
+          -5.4,
+          0,
+          3.4
+        ],
+        "scale": [
+          3.6,
+          1.4,
+          3.2
+        ],
+        "co2eTpy": 1040,
+        "shareOfTotal": 0.1,
+        "benchmarkIntensity": 40,
+        "actualIntensity": 46,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Fresh water drawn for all process stages; no tertiary reuse.",
+        "interventions": [
+          {
+            "id": "surat-02:etp:etp-sludge-symbiosis",
+            "title": "Waste-to-input: ETP sludge → nearby brick/block units",
+            "category": "waste-to-input",
+            "capexInr": 135200,
+            "annualSavingInr": 520000,
+            "co2ReductionTpy": 208,
+            "paybackMonths": 3,
+            "confidence": "low",
+            "description": "Dewatered sludge substitutes part of the raw material at nearby brick/block units.",
+            "circularityGainPct": 0.09
+          },
+          {
+            "id": "surat-02:etp:etp-biogas",
+            "title": "Anaerobic pre-treatment with biogas capture",
+            "category": "waste-to-input",
+            "capexInr": 1664000,
+            "annualSavingInr": 468000,
+            "co2ReductionTpy": 260,
+            "paybackMonths": 43,
+            "confidence": "medium",
+            "description": "Capture methane from high-COD effluent and use it in the boiler.",
+            "circularityGainPct": 0.06
+          },
+          {
+            "id": "surat-02:etp:etp-water-reuse",
+            "title": "Tertiary treatment + process water reuse",
+            "category": "recycling-loop",
+            "capexInr": 988000,
+            "annualSavingInr": 174300,
+            "co2ReductionTpy": 83,
+            "paybackMonths": 68,
+            "confidence": "medium",
+            "description": "Reuse treated effluent for non-critical process water; cuts fresh-water pumping.",
+            "circularityGainPct": 0.04
+          }
+        ]
+      }
+    ],
+    "lat": 21.145000000000003,
+    "lon": 72.81,
+    "wasteStreams": [
+      {
+        "tag": "textile_sludge",
+        "label": "ETP textile sludge",
+        "tpy": 480,
+        "form": "solid",
+        "disposalCostInrPerT": 2100
+      }
+    ],
+    "acceptedInputs": [
+      {
+        "tag": "cotton_waste",
+        "label": "Recycled fibre feed",
+        "maxTpy": 500,
+        "virginCostInrPerT": 5800
+      }
+    ],
+    "implementedInterventionIds": [
+      "surat-02:stenter:dryer-exhaust",
+      "surat-02:dyeing:dye-reuse"
+    ],
+    "consentToShare": true
+  },
+  {
+    "id": "rajkot-01",
+    "name": "Patel Castings & Engineering",
+    "sector": "Engineering — Grey-iron foundry",
+    "cluster": "Rajkot, Gujarat",
+    "outputTonnesPerMonth": 700,
+    "totalCo2eTpy": 9700,
+    "totalEnergyMwhPerYear": 15200,
+    "totalWasteTpy": 1800,
+    "circularityRatio": 0.33,
+    "dataSource": "synthetic",
+    "nodes": [
+      {
+        "id": "rajkot-01:furnace",
+        "label": "Induction Furnace",
+        "kind": "furnace",
+        "position": [
+          -1.5,
+          0,
+          -3
+        ],
+        "scale": [
+          5,
+          2.6,
+          2.6
+        ],
+        "co2eTpy": 5335,
+        "shareOfTotal": 0.55,
+        "benchmarkIntensity": 320,
+        "actualIntensity": 426,
+        "severity": "crit",
+        "confidence": "medium",
+        "rootCause": "Melt energy 40% above benchmark; low scrap return, cold charge.",
+        "interventions": [
+          {
+            "id": "rajkot-01:furnace:furnace-regen",
+            "title": "Regenerative burners / recuperator on furnace",
+            "category": "heat-recovery",
+            "capexInr": 13000000,
+            "annualSavingInr": 2016000,
+            "co2ReductionTpy": 960,
+            "paybackMonths": 77,
+            "confidence": "high",
+            "description": "Preheat combustion air from flue gas; typical 15–25 % fuel saving on batch furnaces."
+          },
+          {
+            "id": "rajkot-01:furnace:furnace-scrap",
+            "title": "Higher in-house scrap return + charge preheating",
+            "category": "recycling-loop",
+            "capexInr": 2250000,
+            "annualSavingInr": 1323700,
+            "co2ReductionTpy": 427,
+            "paybackMonths": 20,
+            "confidence": "medium",
+            "description": "Close the loop on runners/risers and preheat charge with exhaust before melting.",
+            "circularityGainPct": 0.06
+          }
+        ]
+      },
+      {
+        "id": "rajkot-01:heat-treat",
+        "label": "Heat Treatment",
+        "kind": "generic",
+        "position": [
+          -0.5,
+          0,
+          1.5
+        ],
+        "scale": [
+          6,
+          1.5,
+          1.6
+        ],
+        "co2eTpy": 1940,
+        "shareOfTotal": 0.2,
+        "benchmarkIntensity": 110,
+        "actualIntensity": 123,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Part-loaded heat-treatment cycles.",
+        "interventions": [
+          {
+            "id": "rajkot-01:heat-treat:heat-treat-sched",
+            "title": "Batch consolidation on heat-treatment cycles",
+            "category": "process-change",
+            "capexInr": 145500,
+            "annualSavingInr": 348000,
+            "co2ReductionTpy": 116,
+            "paybackMonths": 5,
+            "confidence": "medium",
+            "description": "Fill furnaces to capacity per cycle; fewer, fuller cycles."
+          }
+        ]
+      },
+      {
+        "id": "rajkot-01:compressor",
+        "label": "Compressor House",
+        "kind": "compressor",
+        "position": [
+          5,
+          0,
+          2.6
+        ],
+        "scale": [
+          3,
+          1.6,
+          2.6
+        ],
+        "co2eTpy": 1164,
+        "shareOfTotal": 0.12,
+        "benchmarkIntensity": 40,
+        "actualIntensity": 50,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Load/unload cycling on fixed-speed compressors.",
+        "interventions": [
+          {
+            "id": "rajkot-01:compressor:air-leak",
+            "title": "Ultrasonic compressed-air leak audit (routine)",
+            "category": "process-change",
+            "capexInr": 69840,
+            "annualSavingInr": 173900,
+            "co2ReductionTpy": 47,
+            "paybackMonths": 5,
+            "confidence": "medium",
+            "description": "Quarterly leak detection recovers 5–8 % of losses even in well-run systems."
+          },
+          {
+            "id": "rajkot-01:compressor:air-vsd",
+            "title": "VSD retrofit on lead compressor",
+            "category": "process-change",
+            "capexInr": 640200,
+            "annualSavingInr": 518000,
+            "co2ReductionTpy": 140,
+            "paybackMonths": 15,
+            "confidence": "high",
+            "description": "Match compressor output to demand instead of load/unload cycling."
+          }
+        ]
+      },
+      {
+        "id": "rajkot-01:sand-dryer",
+        "label": "Sand Drying",
+        "kind": "dryer",
+        "position": [
+          4.8,
+          0,
+          -2.6
+        ],
+        "scale": [
+          2.4,
+          4,
+          2.4
+        ],
+        "co2eTpy": 485,
+        "shareOfTotal": 0.05,
+        "benchmarkIntensity": 25,
+        "actualIntensity": 26,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Near benchmark.",
+        "interventions": [
+          {
+            "id": "rajkot-01:sand-dryer:dryer-moisture",
+            "title": "Inline moisture / density control on dryer feed",
+            "category": "process-change",
+            "capexInr": 322000,
+            "annualSavingInr": 73200,
+            "co2ReductionTpy": 24,
+            "paybackMonths": 53,
+            "confidence": "medium",
+            "description": "Tighten feed consistency to cut excess evaporation load."
+          },
+          {
+            "id": "rajkot-01:sand-dryer:dryer-exhaust",
+            "title": "Exhaust-air recirculation on dryer / stenter",
+            "category": "heat-recovery",
+            "capexInr": 560000,
+            "annualSavingInr": 112700,
+            "co2ReductionTpy": 49,
+            "paybackMonths": 60,
+            "confidence": "high",
+            "description": "Recirculate part of the hot exhaust; standard on stenters and spray dryers."
+          }
+        ]
+      },
+      {
+        "id": "rajkot-01:etp",
+        "label": "Effluent / Slag Yard",
+        "kind": "effluent",
+        "position": [
+          -5.4,
+          0,
+          3.4
+        ],
+        "scale": [
+          3.6,
+          1.4,
+          3.2
+        ],
+        "co2eTpy": 776,
+        "shareOfTotal": 0.08,
+        "benchmarkIntensity": 20,
+        "actualIntensity": 28,
+        "severity": "crit",
+        "confidence": "medium",
+        "rootCause": "Slag sent to landfill; usable as aggregate.",
+        "interventions": [
+          {
+            "id": "rajkot-01:etp:etp-sludge-symbiosis",
+            "title": "Waste-to-input: ETP sludge → nearby brick/block units",
+            "category": "waste-to-input",
+            "capexInr": 100880,
+            "annualSavingInr": 387500,
+            "co2ReductionTpy": 155,
+            "paybackMonths": 3,
+            "confidence": "low",
+            "description": "Dewatered sludge substitutes part of the raw material at nearby brick/block units.",
+            "circularityGainPct": 0.09
+          },
+          {
+            "id": "rajkot-01:etp:etp-biogas",
+            "title": "Anaerobic pre-treatment with biogas capture",
+            "category": "waste-to-input",
+            "capexInr": 1241600,
+            "annualSavingInr": 349200,
+            "co2ReductionTpy": 194,
+            "paybackMonths": 43,
+            "confidence": "medium",
+            "description": "Capture methane from high-COD effluent and use it in the boiler.",
+            "circularityGainPct": 0.06
+          },
+          {
+            "id": "rajkot-01:etp:etp-water-reuse",
+            "title": "Tertiary treatment + process water reuse",
+            "category": "recycling-loop",
+            "capexInr": 737200,
+            "annualSavingInr": 130200,
+            "co2ReductionTpy": 62,
+            "paybackMonths": 68,
+            "confidence": "medium",
+            "description": "Reuse treated effluent for non-critical process water; cuts fresh-water pumping.",
+            "circularityGainPct": 0.04
+          }
+        ]
+      }
+    ],
+    "lat": 22.315,
+    "lon": 70.825,
+    "wasteStreams": [
+      {
+        "tag": "foundry_slag",
+        "label": "Furnace slag",
+        "tpy": 1100,
+        "form": "solid",
+        "disposalCostInrPerT": 1100
+      },
+      {
+        "tag": "foundry_sand",
+        "label": "Spent moulding sand",
+        "tpy": 2600,
+        "form": "solid",
+        "disposalCostInrPerT": 900
+      }
+    ],
+    "acceptedInputs": [],
+    "implementedInterventionIds": [],
+    "consentToShare": true
+  },
+  {
+    "id": "jamnagar-01",
+    "name": "Saurashtra Brass Components",
+    "sector": "Engineering — Brass parts",
+    "cluster": "Jamnagar, Gujarat",
+    "outputTonnesPerMonth": 400,
+    "totalCo2eTpy": 5400,
+    "totalEnergyMwhPerYear": 8600,
+    "totalWasteTpy": 600,
+    "circularityRatio": 0.41,
+    "dataSource": "synthetic",
+    "nodes": [
+      {
+        "id": "jamnagar-01:furnace",
+        "label": "Induction Furnace",
+        "kind": "furnace",
+        "position": [
+          -1.5,
+          0,
+          -3
+        ],
+        "scale": [
+          5,
+          2.6,
+          2.6
+        ],
+        "co2eTpy": 2970,
+        "shareOfTotal": 0.55,
+        "benchmarkIntensity": 320,
+        "actualIntensity": 371,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Melt energy 35% above benchmark; low scrap return, cold charge.",
+        "interventions": [
+          {
+            "id": "jamnagar-01:furnace:furnace-regen",
+            "title": "Regenerative burners / recuperator on furnace",
+            "category": "heat-recovery",
+            "capexInr": 7722000,
+            "annualSavingInr": 1123500,
+            "co2ReductionTpy": 535,
+            "paybackMonths": 82,
+            "confidence": "high",
+            "description": "Preheat combustion air from flue gas; typical 15–25 % fuel saving on batch furnaces."
+          },
+          {
+            "id": "jamnagar-01:furnace:furnace-scrap",
+            "title": "Higher in-house scrap return + charge preheating",
+            "category": "recycling-loop",
+            "capexInr": 1336500,
+            "annualSavingInr": 737800,
+            "co2ReductionTpy": 238,
+            "paybackMonths": 22,
+            "confidence": "medium",
+            "description": "Close the loop on runners/risers and preheat charge with exhaust before melting.",
+            "circularityGainPct": 0.06
+          }
+        ]
+      },
+      {
+        "id": "jamnagar-01:heat-treat",
+        "label": "Heat Treatment",
+        "kind": "generic",
+        "position": [
+          -0.5,
+          0,
+          1.5
+        ],
+        "scale": [
+          6,
+          1.5,
+          1.6
+        ],
+        "co2eTpy": 1080,
+        "shareOfTotal": 0.2,
+        "benchmarkIntensity": 110,
+        "actualIntensity": 116,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Part-loaded heat-treatment cycles.",
+        "interventions": [
+          {
+            "id": "jamnagar-01:heat-treat:heat-treat-sched",
+            "title": "Batch consolidation on heat-treatment cycles",
+            "category": "process-change",
+            "capexInr": 81000,
+            "annualSavingInr": 195000,
+            "co2ReductionTpy": 65,
+            "paybackMonths": 5,
+            "confidence": "medium",
+            "description": "Fill furnaces to capacity per cycle; fewer, fuller cycles."
+          }
+        ]
+      },
+      {
+        "id": "jamnagar-01:compressor",
+        "label": "Compressor House",
+        "kind": "compressor",
+        "position": [
+          5,
+          0,
+          2.6
+        ],
+        "scale": [
+          3,
+          1.6,
+          2.6
+        ],
+        "co2eTpy": 648,
+        "shareOfTotal": 0.12,
+        "benchmarkIntensity": 40,
+        "actualIntensity": 48,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Load/unload cycling on fixed-speed compressors.",
+        "interventions": [
+          {
+            "id": "jamnagar-01:compressor:air-leak",
+            "title": "Ultrasonic compressed-air leak audit (routine)",
+            "category": "process-change",
+            "capexInr": 42000,
+            "annualSavingInr": 96200,
+            "co2ReductionTpy": 26,
+            "paybackMonths": 5,
+            "confidence": "medium",
+            "description": "Quarterly leak detection recovers 5–8 % of losses even in well-run systems."
+          },
+          {
+            "id": "jamnagar-01:compressor:air-vsd",
+            "title": "VSD retrofit on lead compressor",
+            "category": "process-change",
+            "capexInr": 385000,
+            "annualSavingInr": 288600,
+            "co2ReductionTpy": 78,
+            "paybackMonths": 16,
+            "confidence": "high",
+            "description": "Match compressor output to demand instead of load/unload cycling."
+          }
+        ]
+      },
+      {
+        "id": "jamnagar-01:sand-dryer",
+        "label": "Sand Drying",
+        "kind": "dryer",
+        "position": [
+          4.8,
+          0,
+          -2.6
+        ],
+        "scale": [
+          2.4,
+          4,
+          2.4
+        ],
+        "co2eTpy": 270,
+        "shareOfTotal": 0.05,
+        "benchmarkIntensity": 25,
+        "actualIntensity": 25,
+        "severity": "ok",
+        "confidence": "medium",
+        "rootCause": "Near benchmark.",
+        "interventions": [
+          {
+            "id": "jamnagar-01:sand-dryer:dryer-moisture",
+            "title": "Inline moisture / density control on dryer feed",
+            "category": "process-change",
+            "capexInr": 322000,
+            "annualSavingInr": 42700,
+            "co2ReductionTpy": 14,
+            "paybackMonths": 90,
+            "confidence": "medium",
+            "description": "Tighten feed consistency to cut excess evaporation load."
+          },
+          {
+            "id": "jamnagar-01:sand-dryer:dryer-exhaust",
+            "title": "Exhaust-air recirculation on dryer / stenter",
+            "category": "heat-recovery",
+            "capexInr": 560000,
+            "annualSavingInr": 62100,
+            "co2ReductionTpy": 27,
+            "paybackMonths": 108,
+            "confidence": "high",
+            "description": "Recirculate part of the hot exhaust; standard on stenters and spray dryers."
+          }
+        ]
+      },
+      {
+        "id": "jamnagar-01:etp",
+        "label": "Effluent / Slag Yard",
+        "kind": "effluent",
+        "position": [
+          -5.4,
+          0,
+          3.4
+        ],
+        "scale": [
+          3.6,
+          1.4,
+          3.2
+        ],
+        "co2eTpy": 432,
+        "shareOfTotal": 0.08,
+        "benchmarkIntensity": 20,
+        "actualIntensity": 22,
+        "severity": "warn",
+        "confidence": "medium",
+        "rootCause": "Slag sent to landfill; usable as aggregate.",
+        "interventions": [
+          {
+            "id": "jamnagar-01:etp:etp-sludge-symbiosis",
+            "title": "Waste-to-input: ETP sludge → nearby brick/block units",
+            "category": "waste-to-input",
+            "capexInr": 91000,
+            "annualSavingInr": 215000,
+            "co2ReductionTpy": 86,
+            "paybackMonths": 5,
+            "confidence": "low",
+            "description": "Dewatered sludge substitutes part of the raw material at nearby brick/block units.",
+            "circularityGainPct": 0.09
+          },
+          {
+            "id": "jamnagar-01:etp:etp-biogas",
+            "title": "Anaerobic pre-treatment with biogas capture",
+            "category": "waste-to-input",
+            "capexInr": 1120000,
+            "annualSavingInr": 194400,
+            "co2ReductionTpy": 108,
+            "paybackMonths": 69,
+            "confidence": "medium",
+            "description": "Capture methane from high-COD effluent and use it in the boiler.",
+            "circularityGainPct": 0.06
+          },
+          {
+            "id": "jamnagar-01:etp:etp-water-reuse",
+            "title": "Tertiary treatment + process water reuse",
+            "category": "recycling-loop",
+            "capexInr": 665000,
+            "annualSavingInr": 73500,
+            "co2ReductionTpy": 35,
+            "paybackMonths": 109,
+            "confidence": "medium",
+            "description": "Reuse treated effluent for non-critical process water; cuts fresh-water pumping.",
+            "circularityGainPct": 0.04
+          }
+        ]
+      }
+    ],
+    "lat": 22.49,
+    "lon": 70.08999999999999,
+    "wasteStreams": [
+      {
+        "tag": "brass_turnings",
+        "label": "Brass turnings / dross",
+        "tpy": 320,
+        "form": "solid",
+        "disposalCostInrPerT": 0
+      }
+    ],
+    "acceptedInputs": [],
+    "implementedInterventionIds": [
+      "jamnagar-01:furnace:furnace-scrap"
+    ],
+    "consentToShare": false
+  }
+]

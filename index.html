@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="dark" />
+<title>Circular Carbon Ecosystem — Stop Guessing. Start Pinpointing.</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { ink: '#0B0C10', glow: '#00FF88', hot: '#FF4500' },
+        fontFamily: {
+          disp: ['"Space Grotesk"', 'sans-serif'],
+          mono: ['"IBM Plex Mono"', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  html { scroll-behavior: auto; }
+  body { background: #0B0C10; color: #E9EEF2; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; overflow-x: clip; }
+  ::selection { background: #00FF88; color: #04110A; }
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: #0B0C10; }
+  ::-webkit-scrollbar-thumb { background: #1d232b; border: 2px solid #0B0C10; border-radius: 6px; }
+
+  .glass {
+    background: rgba(14, 17, 23, 0.62);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 255, 136, 0.14);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 24px 70px rgba(0,0,0,.55);
+  }
+  .btn-primary {
+    background: #00FF88; color: #04110A;
+    box-shadow: 0 0 22px rgba(0,255,136,.35), 0 0 70px rgba(0,255,136,.14);
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 30px rgba(0,255,136,.55), 0 0 90px rgba(0,255,136,.22); }
+  .btn-primary:active { transform: translateY(0); }
+  .ghost-btn { border: 1px solid rgba(0,255,136,.35); color: #00FF88; transition: background .18s ease, border-color .18s ease; }
+  .ghost-btn:hover { background: rgba(0,255,136,.08); border-color: rgba(0,255,136,.7); }
+
+  @keyframes blink { 0%,60%{opacity:1} 61%,100%{opacity:0} }
+  .caret { animation: blink 1.1s steps(1) infinite; }
+  @keyframes pulsering { 0%{transform:scale(1);opacity:.9} 100%{transform:scale(2.2);opacity:0} }
+  .dotpulse::after { content:''; position:absolute; inset:0; border:1px solid currentColor; animation: pulsering 1.8s ease-out infinite; }
+  @keyframes cueline { 0%{transform:translateY(-14px);opacity:0} 25%{opacity:1} 100%{transform:translateY(40px);opacity:0} }
+  .cueline { animation: cueline 1.9s ease-in-out infinite; }
+  @keyframes modalin { from { opacity:0; transform: translateY(14px) scale(.985); } }
+  .modalin { animation: modalin .28s ease-out; }
+
+  #boot { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:99;
+    background:#0B0C10; color:#4b5a60; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.3em; }
+</style>
+
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+    "react-dom": "https://esm.sh/react-dom@18.3.1?deps=react@18.3.1",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?deps=react@18.3.1",
+    "three": "https://esm.sh/three@0.160.0",
+    "@react-three/fiber": "https://esm.sh/@react-three/fiber@8.15.19?deps=react@18.3.1,three@0.160.0",
+    "@react-three/drei": "https://esm.sh/@react-three/drei@9?deps=react@18.3.1,three@0.160.0,@react-three/fiber@8.15.19",
+    "@react-three/postprocessing": "https://esm.sh/@react-three/postprocessing@2.16.2?deps=react@18.3.1,three@0.160.0,@react-three/fiber@8.15.19",
+    "gsap/all": "https://esm.sh/gsap@3.12.5/all"
+  }
+}
+</script>
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+<script>
+  // Register a TSX-capable preset for in-browser transpilation
+  Babel.registerPreset('tsx', {
+    presets: [[Babel.availablePresets['typescript'], { allExtensions: true, isTSX: true }]],
+  });
+  window.addEventListener('error', function () {
+    var b = document.getElementById('boot');
+    if (b) b.textContent = 'FAILED TO LOAD 3D MODULES — CHECK NETWORK AND RELOAD';
+  }, true);
+</script>
+</head>
+<body>
+<div id="boot">INITIALIZING DIAGNOSTIC ENGINE<span class="caret">_</span></div>
+<div id="root"></div>
+
+<script type="text/babel" data-type="module" data-presets="tsx,react">
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import * as THREE from 'three';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Environment, Lightformer, Float } from '@react-three/drei';
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
+import { gsap, ScrollTrigger } from 'gsap/all';
+
+/* ============================================================
+   Shared mutable store — GSAP scrubbed timeline writes to it,
+   R3F components read it every frame. No React re-renders on scroll.
+   ============================================================ */
+const store = {
+  cam: { x: 0, y: 0.9, z: 7.6, tx: -1.9, ty: 0.15, tz: 0 },
+  leak: 0,          // 0..1 combustion-loss state (drives red)
+  fix: 0,           // 0..1 slider-driven fix state (drives green)
+  scale: 0,         // 0..1 phase-3 rollup reveal
+  machineScale: 1,  // shrinks when the camera pulls to state level
+  intro: 0, introZ: 2.6, px: 0, py: 0, progress: 0,
+};
+
+// Repository boundary: this landing application only navigates to the MVP.
+// For a deployed setup, pass the live MVP address as ?app=https://app.example.com.
+const MVP_URL = new URLSearchParams(window.location.search).get('app') || '/app.html';
+const openMvp = () => { window.location.assign(MVP_URL); };
+
+/* ---------- helpers ---------- */
+const clamp = (v: number, a: number = 0, b: number = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+const easeOutBack = (t: number) => { const c = 1.70158; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
+
+/* ---------- India silhouette for the regulator-view dot map.
+   It is traced in presentation space from the supplied national outline,
+   which keeps the recognisable Kashmir, Gujarat, peninsula and north-east contours. ---------- */
+const INDIA_SILHOUETTE: number[][] = [
+  [134,48],[148,43],[161,42],[170,46],[176,54],[176,61],[184,65],[199,65],[213,61],[222,56],[229,57],
+  [235,64],[235,71],[230,76],[221,80],[219,88],[220,98],[226,105],[225,110],[218,111],[212,106],[212,116],
+  [218,127],[229,135],[240,144],[249,151],[255,161],[256,169],[265,177],[277,181],[290,187],[304,190],[318,196],
+  [334,198],[347,200],[350,199],[350,189],[347,179],[350,173],[354,172],[357,180],[356,188],[365,190],[376,187],
+  [386,184],[397,182],[404,175],[416,174],[422,176],[426,175],[431,177],[432,185],[439,190],[446,187],[452,190],
+  [459,185],[466,181],[462,190],[467,196],[455,200],[449,212],[444,222],[445,232],[438,239],[439,250],[433,258],
+  [432,250],[425,247],[425,258],[419,262],[414,259],[411,245],[403,242],[398,245],[396,259],[392,266],[387,267],
+  [384,258],[384,248],[378,242],[368,239],[367,247],[375,256],[378,267],[374,276],[365,278],[359,273],[359,265],
+  [353,258],[351,251],[344,245],[341,239],[347,234],[353,235],[358,231],[358,223],[354,218],[348,214],[349,205],
+  [354,201],[349,199],[347,208],[349,220],[353,230],[350,241],[345,252],[350,263],[354,274],[350,283],[341,288],
+  [333,297],[326,307],[316,315],[306,324],[300,335],[290,344],[282,352],[274,365],[267,374],[260,378],[254,377],
+  [249,384],[243,388],[240,396],[241,408],[244,420],[243,432],[237,440],[239,447],[231,452],[232,460],[223,463],
+  [222,476],[217,488],[209,494],[202,494],[197,490],[192,478],[187,465],[181,454],[178,440],[172,427],[169,413],
+  [165,399],[160,384],[157,370],[153,354],[149,344],[147,332],[150,321],[147,312],[148,301],[140,298],[132,298],
+  [124,294],[117,287],[113,279],[111,272],[105,272],[99,274],[91,272],[85,267],[79,258],[77,250],[81,243],[88,242],
+  [94,245],[101,244],[106,238],[109,230],[107,220],[102,215],[104,206],[98,204],[91,206],[88,201],[90,194],[95,185],
+  [100,181],[103,184],[104,193],[111,193],[116,186],[120,176],[125,169],[130,157],[136,151],[139,139],[146,130],
+  [151,118],[160,114],[169,112],[171,107],[164,103],[154,99],[148,93],[146,80],[143,72],[134,67],[127,63],[130,56],[134,48]
+].map(([x, y]) => [(x * 0.1166 - 32.5) * 0.65, y * 0.0956 - 20.8]);
+function inPoly(lon: number, lat: number, poly: number[][]): boolean {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const xi = poly[i][0], yi = poly[i][1], xj = poly[j][0], yj = poly[j][1];
+    if (((yi > lat) !== (yj > lat)) && (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi)) inside = !inside;
+  }
+  return inside;
+}
+const inIndia = (x: number, z: number) => inPoly(x, z, INDIA_SILHOUETTE);
+
+/* ---------- fix-block slots on the machine ---------- */
+const SLOTS: number[][] = [[1.85,.85,.3],[-1.2,1.05,-.4],[.35,1.32,.6],[2.25,.4,-.55],[-.6,1.2,.95],[1.05,1.12,-1.02]];
+const TH: number[] = [.06,.2,.34,.48,.62,.76];
+const CLUSTERS = [
+  { x: -10.7, z: 2.7, c: '#00FF88', r: 2.6 },  // Gujarat pilot cluster
+  { x: -5.1,  z: -6.6, c: '#FF4500', r: 1.8 }, // NCR
+  { x: -8.6,  z: 9.4, c: '#FF4500', r: 1.6 },  // Raigad belt
+  { x: -2.5,  z: -3.1, c: '#FF4500', r: 1.5 }, // Kanpur
+];
+
+/* ============================================================
+   3D — Camera rig (reads store.cam + pointer parallax)
+   ============================================================ */
+function CameraRig() {
+  const target = useMemo(() => new THREE.Vector3(), []);
+  useFrame(({ camera }) => {
+    const c = store.cam, k = 1 - store.scale;
+    camera.position.set(c.x + store.px * 0.35 * k, c.y + store.py * 0.22 * k, c.z + store.introZ);
+    target.set(c.tx, c.ty, c.tz);
+    camera.lookAt(target);
+  });
+  return null;
+}
+
+/* ============================================================
+   3D — Lighting (colors shift cool -> combustion red -> fixed green)
+   ============================================================ */
+function Lighting() {
+  const key = useRef<THREE.DirectionalLight>(null!);
+  const leakL = useRef<THREE.PointLight>(null!);
+  const fixL = useRef<THREE.PointLight>(null!);
+  const cool = useMemo(() => new THREE.Color('#9fc7e8'), []);
+  const hot = useMemo(() => new THREE.Color('#ff9a5c'), []);
+  const tmp = useMemo(() => new THREE.Color(), []);
+  useFrame((s) => {
+    const heat = store.leak * (1 - store.fix * 0.88);
+    key.current.color.copy(tmp.copy(cool).lerp(hot, heat));
+    const flick = 1 + Math.sin(s.clock.elapsedTime * 31) * 0.12 + Math.sin(s.clock.elapsedTime * 57) * 0.08;
+    leakL.current.intensity = store.leak * (1 - store.fix) * 30 * flick;
+    fixL.current.intensity = store.fix * 22;
+  });
+  return (
+    <>
+      <hemisphereLight args={['#33424c', '#05070a', 0.55]} />
+      <directionalLight ref={key} position={[5, 7, 4]} intensity={1.5} />
+      <directionalLight position={[-6, 3, -5]} intensity={0.5} color="#26424a" />
+      <pointLight ref={leakL} position={[1.9, 0.4, 0.5]} color="#FF4500" distance={9} decay={2} intensity={0} />
+      <pointLight ref={fixL} position={[1.6, 0.6, 0.8]} color="#00FF88" distance={9} decay={2} intensity={0} />
+    </>
+  );
+}
+
+/* ============================================================
+   3D — The processing node (all primitives, no external models)
+   ============================================================ */
+function Machine() {
+  const group = useRef<THREE.Group>(null!);
+  const fins = useRef<THREE.Group>(null!);
+  const gearSpin = useRef<THREE.Group>(null!);
+  const ringA = useRef<THREE.Group>(null!);
+  const ringB = useRef<THREE.Group>(null!);
+  const blocks = useRef<(THREE.Group | null)[]>([]);
+
+  const matDark = useMemo(() => new THREE.MeshStandardMaterial({ color: '#3a424c', metalness: 0.85, roughness: 0.38 }), []);
+  const matMid = useMemo(() => new THREE.MeshStandardMaterial({ color: '#59636f', metalness: 0.9, roughness: 0.26 }), []);
+  const matGear = useMemo(() => new THREE.MeshStandardMaterial({ color: '#2a3038', metalness: 0.75, roughness: 0.32, emissive: new THREE.Color('#232a33'), emissiveIntensity: 0.35 }), []);
+  const matStrip = useMemo(() => new THREE.MeshStandardMaterial({ color: '#0c1116', emissive: new THREE.Color('#00FF88'), emissiveIntensity: 0.4 }), []);
+  const matBlock = useMemo(() => new THREE.MeshStandardMaterial({ color: '#0e1a14', emissive: new THREE.Color('#00FF88'), emissiveIntensity: 1.4, metalness: 0.2, roughness: 0.4 }), []);
+  const matSat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#0a2016', emissive: new THREE.Color('#00FF88'), emissiveIntensity: 1.6 }), []);
+  const matBeacon = useMemo(() => new THREE.MeshStandardMaterial({ color: '#1a0d06', emissive: new THREE.Color('#FF4500'), emissiveIntensity: 0 }), []);
+  const matGlass = useMemo(() => new THREE.MeshPhysicalMaterial({ color: '#d7fff0', transmission: 0.92, thickness: 0.5, roughness: 0.12, metalness: 0, ior: 1.35, transparent: true }), []);
+  const blockGeo = useMemo(() => new THREE.BoxGeometry(0.3, 0.3, 0.3), []);
+  const blockEdges = useMemo(() => new THREE.EdgesGeometry(blockGeo), [blockGeo]);
+
+  const cHot = useMemo(() => new THREE.Color('#FF4500'), []);
+  const cOk = useMemo(() => new THREE.Color('#00FF88'), []);
+  const cIdle = useMemo(() => new THREE.Color('#232a33'), []);
+  const tmp = useMemo(() => new THREE.Color(), []);
+
+  useFrame((s, dt) => {
+    const t = s.clock.elapsedTime;
+    fins.current.rotation.x += dt * 1.1;
+    gearSpin.current.rotation.z -= dt * (0.9 + store.leak * 2.4 + store.fix * 1.4);
+    ringA.current.rotation.y += dt * 0.22;
+    ringB.current.rotation.y -= dt * 0.15;
+    group.current.scale.setScalar(Math.max(0.0001, store.machineScale * store.intro));
+
+    // Gear = leak point. Idle grey -> combustion red -> stable green as the fix applies.
+    const heat = store.leak * (1 - store.fix * 0.9);
+    tmp.copy(cIdle).lerp(cHot, heat).lerp(cOk, store.fix * 0.95);
+    matGear.emissive.copy(tmp);
+    matGear.emissiveIntensity = 0.35 + heat * 2.2 + store.fix * 1.1;
+    matStrip.emissiveIntensity = 0.4 + store.fix * 1.1 + Math.sin(t * 2.2) * 0.12 * store.fix;
+
+    // Alarm beacon on the stack
+    matBeacon.emissive.copy(tmp.copy(cHot).lerp(cOk, store.fix));
+    matBeacon.emissiveIntensity = store.leak * (1 - store.fix) * (1.3 + Math.sin(t * 7) * 0.9) + store.fix * 1.2;
+
+    // Circular-fix blocks snap into place as the slider crosses thresholds
+    for (let i = 0; i < SLOTS.length; i++) {
+      const g = blocks.current[i]; if (!g) continue;
+      const k = clamp((store.fix - TH[i]) / 0.07);
+      g.visible = k > 0;
+      const e = easeOutBack(k);
+      g.scale.setScalar(Math.max(e, 0.0001));
+      g.position.set(SLOTS[i][0], SLOTS[i][1] + Math.sin(t * 1.3 + i * 1.7) * 0.04, SLOTS[i][2]);
+      g.rotation.y = t * 0.5;
+    }
+  });
+
+  return (
+    <group ref={group}>
+      {/* plinth + glowing seam */}
+      <mesh position={[0, -1.05, 0]} material={matDark}><boxGeometry args={[3.4, 0.18, 2.1]} /></mesh>
+      <mesh position={[0, -0.95, 1.06]} material={matStrip}><boxGeometry args={[3.4, 0.025, 0.02]} /></mesh>
+
+      {/* pillars + accent strips */}
+      {[-1.25, 1.25].map((x) => (
+        <group key={x}>
+          <mesh position={[x, -0.2, 0]} material={matDark}><boxGeometry args={[0.26, 1.7, 0.26]} /></mesh>
+          <mesh position={[x + 0.145, -0.2, 0]} material={matStrip}><boxGeometry args={[0.015, 1.5, 0.05]} /></mesh>
+        </group>
+      ))}
+
+      {/* rotor core + radiator fins */}
+      <mesh rotation={[0, 0, Math.PI / 2]} material={matMid}><cylinderGeometry args={[0.52, 0.52, 2.3, 24]} /></mesh>
+      {[-1.28, 1.28].map((x) => (
+        <mesh key={x} position={[x, 0, 0]} rotation={[0, 0, Math.PI / 2]} material={matDark}><cylinderGeometry args={[0.2, 0.2, 0.24, 20]} /></mesh>
+      ))}
+      <group ref={fins}>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <group key={i} rotation={[i / 8 * Math.PI * 2, 0, 0]}>
+            <mesh position={[0, 0.58, 0]} material={matDark}><boxGeometry args={[2.1, 0.05, 0.34]} /></mesh>
+          </group>
+        ))}
+      </group>
+
+      {/* coupling + THE LEAK GEAR */}
+      <mesh position={[1.42, 0, 0]} rotation={[0, 0, Math.PI / 2]} material={matDark}><cylinderGeometry args={[0.1, 0.1, 0.5, 16]} /></mesh>
+      <group position={[1.7, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+        <group ref={gearSpin}>
+          <mesh material={matGear}><torusGeometry args={[0.5, 0.13, 14, 40]} /></mesh>
+          {Array.from({ length: 10 }).map((_, i) => (
+            <group key={i} rotation={[0, 0, i / 10 * Math.PI * 2]}>
+              <mesh position={[0.68, 0, 0]} material={matGear}><boxGeometry args={[0.26, 0.11, 0.34]} /></mesh>
+            </group>
+          ))}
+          <mesh rotation={[Math.PI / 2, 0, 0]} material={matDark}><cylinderGeometry args={[0.3, 0.3, 0.46, 20]} /></mesh>
+        </group>
+      </group>
+
+      {/* control housing + stack + alarm beacon */}
+      <mesh position={[-0.3, 0.95, -0.35]} material={matDark}><boxGeometry args={[0.9, 0.42, 0.7]} /></mesh>
+      {[-0.65, 0.05].map((x) => (
+        <mesh key={x} position={[x, 0.66, -0.35]} material={matDark}><boxGeometry args={[0.08, 0.5, 0.08]} /></mesh>
+      ))}
+      <mesh position={[-0.55, 1.42, -0.35]} material={matMid}><cylinderGeometry args={[0.06, 0.06, 0.5, 12]} /></mesh>
+      <mesh position={[-0.55, 1.7, -0.35]} material={matBeacon}><sphereGeometry args={[0.055, 12, 12]} /></mesh>
+
+      {/* transmission-glass orbital rings */}
+      <group ref={ringA}>
+        <mesh rotation={[Math.PI / 2.2, 0, 0.4]} material={matGlass}><torusGeometry args={[1.5, 0.05, 16, 72]} /></mesh>
+      </group>
+      <group ref={ringB}>
+        <mesh rotation={[Math.PI / 1.9, 0, -0.5]} material={matGlass}><torusGeometry args={[1.85, 0.03, 16, 80]} /></mesh>
+      </group>
+
+      {/* circular-fix upgrade blocks */}
+      {SLOTS.map((_, i) => (
+        <group key={i} ref={(el) => { blocks.current[i] = el; }} visible={false}>
+          <mesh material={matBlock}><boxGeometry args={[0.3, 0.3, 0.3]} /></mesh>
+          <lineSegments geometry={blockEdges}>
+            <lineBasicMaterial color="#00FF88" transparent opacity={0.9} toneMapped={false} />
+          </lineSegments>
+        </group>
+      ))}
+
+      {/* floating telemetry satellites */}
+      {[[2.6, 1.1, -1.2, 0.09], [-2.4, 0.6, 1.1, 0.07], [1.4, -1.2, 1.6, 0.06]].map((p, i) => (
+        <Float key={i} speed={2 + i} rotationIntensity={1.4} floatIntensity={1.6}>
+          <mesh position={[p[0], p[1], p[2]]} material={matSat}><octahedronGeometry args={[p[3], 0]} /></mesh>
+        </Float>
+      ))}
+    </group>
+  );
+}
+
+/* ============================================================
+   3D — Data fragments: chaotic in, organized green beam out
+   ============================================================ */
+function FlowField() {
+  const mesh = useRef<THREE.InstancedMesh>(null!);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+  const N = 64;
+  const frags = useMemo(() => Array.from({ length: N }, (_, i) => ({
+    t: Math.random(),
+    speed: 0.05 + Math.random() * 0.045,
+    sy: (Math.random() - 0.5) * 3.2,
+    sz: (Math.random() - 0.5) * 2.2,
+    rot: [Math.random() * 6.28, Math.random() * 6.28, Math.random() * 6.28],
+    strand: (i % 3) - 1,
+    order: (i * 0.61803) % 1,
+    size: 0.05 + Math.random() * 0.05,
+    wob: Math.random() * 6.28,
+  })), []);
+  const cIn = useMemo(() => new THREE.Color('#4d5a63'), []);
+  const cOut = useMemo(() => new THREE.Color('#00FF88'), []);
+  const tmpC = useMemo(() => new THREE.Color(), []);
+
+  useEffect(() => {
+    for (let i = 0; i < N; i++) mesh.current.setColorAt(i, cIn);
+    if (mesh.current.instanceColor) mesh.current.instanceColor.needsUpdate = true;
+  }, []);
+
+  useFrame((s, dt) => {
+    const m = mesh.current, t = s.clock.elapsedTime;
+    const op = (1 - store.scale) * (1 - store.leak * 0.35) * (0.3 + 0.7 * store.intro);
+    (m.material as THREE.MeshBasicMaterial).opacity = Math.max(0, op) * 0.9;
+    m.visible = op > 0.01;
+    if (!m.visible) return;
+
+    for (let i = 0; i < N; i++) {
+      const f = frags[i];
+      f.t = (f.t + dt * f.speed) % 1;
+      const tt = f.t;
+      const env = tt < 0.34 ? 1 : tt < 0.62 ? 1 - (tt - 0.34) / 0.28 : 0; // 1 = chaos, 0 = organized
+      const b = 1 - env;
+      const wob = Math.sin(t * 2 + f.wob) * 0.06;
+      dummy.position.set(
+        lerp(-6.6 + tt * 13.2, 0.9 + f.order * 5.6, b),
+        f.sy * env + f.strand * 0.16 * b + wob * env,
+        f.sz * env + f.strand * 0.1 * b
+      );
+      const sc = f.size * (tt < 0.04 ? tt / 0.04 : tt > 0.92 ? (1 - tt) / 0.08 : 1);
+      dummy.scale.setScalar(Math.max(sc, 0.0001));
+      dummy.rotation.set(f.rot[0] * env, f.rot[1] * env, f.rot[2] * env);
+      dummy.updateMatrix();
+      m.setMatrixAt(i, dummy.matrix);
+      tmpC.copy(cIn).lerp(cOut, clamp((tt - 0.42) / 0.2));
+      m.setColorAt(i, tmpC);
+    }
+    m.instanceMatrix.needsUpdate = true;
+    if (m.instanceColor) m.instanceColor.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={mesh} args={[undefined as any, undefined as any, N]} frustumCulled={false}>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshBasicMaterial toneMapped={false} transparent opacity={0.9} />
+    </instancedMesh>
+  );
+}
+
+/* ============================================================
+   3D — Leak sparks at the failing gear
+   ============================================================ */
+function LeakSparks() {
+  const pts = useRef<THREE.Points>(null!);
+  const N = 90;
+  const positions = useMemo(() => { const a = new Float32Array(N * 3); for (let i = 0; i < N; i++) a[i * 3] = 1.75; return a; }, []);
+  const attr = useRef<THREE.BufferAttribute>(null!);
+  const data = useMemo(() => Array.from({ length: N }, () => ({
+    life: Math.random(), vx: 0.4 + Math.random() * 1.1, vy: Math.random() * 0.7, vz: (Math.random() - 0.5) * 0.6, r: Math.random(),
+  })), []);
+
+  useFrame((s, dt) => {
+    const op = store.leak * (1 - store.fix * 0.92);
+    pts.current.visible = op > 0.01;
+    if (!pts.current.visible) return;
+    (pts.current.material as THREE.PointsMaterial).opacity = op * 0.85;
+    const arr = attr.current.array as Float32Array;
+    for (let i = 0; i < N; i++) {
+      const d = data[i];
+      d.life -= dt * (0.5 + d.r * 0.6);
+      if (d.life <= 0) { d.life = 1; d.vx = 0.4 + Math.random() * 1.1; d.vy = Math.random() * 0.7; d.vz = (Math.random() - 0.5) * 0.6; }
+      const k = 1 - d.life;
+      arr[i * 3] = 1.75 + d.vx * k * 1.5;
+      arr[i * 3 + 1] = d.vy * k - 0.35 * k * k;
+      arr[i * 3 + 2] = d.vz * k;
+    }
+    attr.current.needsUpdate = true;
+  });
+
+  return (
+    <points ref={pts} frustumCulled={false} visible={false}>
+      <bufferGeometry>
+        <bufferAttribute ref={attr} attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <pointsMaterial color="#FF5A22" size={0.06} transparent opacity={0} depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} />
+    </points>
+  );
+}
+
+/* ============================================================
+   3D — Regulator view: InstancedMesh dot-map of India
+   ============================================================ */
+function DotField() {
+  const mesh = useRef<THREE.InstancedMesh>(null!);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+  const N = 3000;
+  const data = useMemo(() => {
+    const pts: { x: number; z: number; d: number; s: number; g: boolean }[] = [];
+    let guard = 0;
+    while (pts.length < N && guard < 90000) {
+      guard++;
+      const x = -15 + Math.random() * 30.5, z = -17 + Math.random() * 44.5;
+      if (!inIndia(x, z)) continue;
+      pts.push({
+        x: x + (Math.random() - 0.5) * 0.3,
+        z: z + (Math.random() - 0.5) * 0.3,
+        d: Math.random(), s: 0.5 + Math.random() * 0.7, g: Math.random() < 0.12,
+      });
+    }
+    if (pts[0]) { pts[0].x = -10.7; pts[0].z = 2.7; pts[0].g = true; pts[0].s = 1.2; pts[0].d = 0.15; } // pilot unit, Gujarat
+    return pts;
+  }, []);
+
+  useEffect(() => {
+    const hot1 = new THREE.Color('#b8420f'), hot2 = new THREE.Color('#7c2c0c'), ok = new THREE.Color('#00FF88');
+    for (let i = 0; i < data.length; i++) mesh.current.setColorAt(i, data[i].g ? ok : (Math.random() < 0.5 ? hot1 : hot2));
+    if (mesh.current.instanceColor) mesh.current.instanceColor.needsUpdate = true;
+  }, [data]);
+
+  useFrame((s) => {
+    const active = store.scale > 0.001;
+    mesh.current.visible = active;
+    if (!active) return;
+    const t = s.clock.elapsedTime, p = store.scale;
+    for (let i = 0; i < data.length; i++) {
+      const u = data[i];
+      const e = easeOutCubic(clamp(p * 1.65 - u.d * 0.65)); // staggered rain-down reveal
+      dummy.position.set(u.x, (1 - e) * 12, u.z);
+      let sc = e * u.s;
+      if (i === 0) sc *= 1.3 + 0.5 * Math.sin(t * 3); // your unit pulses
+      dummy.scale.setScalar(Math.max(sc, 0.0001));
+      dummy.rotation.set(0, 0, 0);
+      dummy.updateMatrix();
+      mesh.current.setMatrixAt(i, dummy.matrix);
+    }
+    mesh.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={mesh} args={[undefined as any, undefined as any, N]} frustumCulled={false} visible={false}>
+      <octahedronGeometry args={[0.14, 0]} />
+      <meshBasicMaterial toneMapped={false} />
+    </instancedMesh>
+  );
+}
+
+/* ---------- pulsing cluster rings over hotspots ---------- */
+function ClusterRings() {
+  const g = useRef<THREE.Group>(null!);
+  const mats = useMemo(() => CLUSTERS.map((c) => new THREE.MeshBasicMaterial({ color: c.c, transparent: true, opacity: 0, toneMapped: false })), []);
+  useFrame((s) => {
+    const on = store.scale > 0.02;
+    g.current.visible = on;
+    if (!on) return;
+    const t = s.clock.elapsedTime;
+    CLUSTERS.forEach((_, i) => {
+      mats[i].opacity = store.scale * (0.32 + 0.18 * Math.sin(t * 1.8 + i));
+      (g.current.children[i] as THREE.Mesh).scale.setScalar(1 + 0.06 * Math.sin(t * 1.8 + i));
+    });
+  });
+  return (
+    <group ref={g} visible={false}>
+      {CLUSTERS.map((c, i) => (
+        <mesh key={i} position={[c.x, 0.05, c.z]} rotation={[-Math.PI / 2, 0, 0]} material={mats[i]}>
+          <torusGeometry args={[c.r, 0.03, 8, 64]} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+/* ============================================================
+   3D — Scene root
+   ============================================================ */
+function Scene() {
+  return (
+    <>
+      <color attach="background" args={['#0B0C10']} />
+      <fog attach="fog" args={['#0B0C10', 80, 340]} />
+      <Suspense fallback={null}>
+        {/* Procedural env-map — metals get real reflections with zero network fetches */}
+        <Environment resolution={256} frames={1}>
+          <Lightformer intensity={2.2} color="#123a2e" position={[0, 6, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} />
+          <Lightformer intensity={3} color="#00FF88" position={[-6, 1, -2]} rotation-y={Math.PI / 2} scale={[10, 2.4, 1]} />
+          <Lightformer intensity={1.6} color="#7fb1c9" position={[6, 2, 1]} rotation-y={-Math.PI / 2} scale={[10, 2.4, 1]} />
+          <Lightformer intensity={1.2} color="#33404d" position={[0, 1, 7]} scale={[10, 3, 1]} />
+        </Environment>
+      </Suspense>
+      <CameraRig />
+      <Lighting />
+      <Machine />
+      <FlowField />
+      <LeakSparks />
+      <DotField />
+      <ClusterRings />
+      <gridHelper args={[180, 90, '#14352c', '#10151c']} position={[0, -1.16, 0]} material-transparent material-opacity={0.5} />
+      <EffectComposer>
+        <Bloom mipmapBlur intensity={1.25} luminanceThreshold={0.28} luminanceSmoothing={0.12} radius={0.75} />
+        <Vignette eskil={false} offset={0.22} darkness={0.8} />
+      </EffectComposer>
+    </>
+  );
+}
+
+/* ============================================================
+   DOM — Header, phase rail & Localization
+   ============================================================ */
+const scrollToId = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+
+type Lang = 'en' | 'gu' | 'hi';
+
+const I18N = {
+  en: {
+    heroBadge: "CIRCULAR CARBON ECOSYSTEM — DIAGNOSTIC ENGINE v2.1",
+    heroH1_1: "Stop Guessing.",
+    heroH1_2: "Start ",
+    heroH1_highlight: "Pinpointing",
+    heroSub: "A diagnostic-and-decision engine that turns energy, materials and waste into a ranked, costed, CO₂-quantified circular action plan — built for Indian SMEs and the regulators who oversee them.",
+    runDiag: "Run Free Diagnostic",
+    theMethod: "THE METHOD",
+    seeMethod: "SEE THE METHOD",
+    brandTitle1: "CIRCULAR CARBON",
+    brandTitle2: "ECOSYSTEM",
+    overview: "OVERVIEW",
+    diagnose: "DIAGNOSE",
+    simulate: "SIMULATE",
+    scale: "SCALE",
+  },
+  gu: {
+    heroBadge: "પરિપત્ર કાર્બન ઇકોસિસ્ટમ — નિદાન એન્જિન v2.1",
+    heroH1_1: "અનુમાન બંધ કરો.",
+    heroH1_2: "ચોક્કસ ",
+    heroH1_highlight: "નિદાન શરૂ કરો",
+    heroSub: "ઊર્જા, સામગ્રી અને કચરાને પ્રાથમિકતાવાળા, ખર્ચ-અંદાજિત અને CO₂-ચકાસાયેલ પરિપત્ર એક્શન પ્લાનમાં રૂપાંતરિત કરતું એન્જિન — ભારતીય ઉદ્યોગો અને નિયમનકારો માટે.",
+    runDiag: "મફત નિદાન શરૂ કરો",
+    theMethod: "કાર્ય પદ્ધતિ",
+    seeMethod: "કાર્ય પદ્ધતિ જુઓ",
+    brandTitle1: "પરિપત્ર કાર્બન",
+    brandTitle2: "ઇકોસિસ્ટમ",
+    overview: "વિહંગાવલોકન",
+    diagnose: "નિદાન",
+    simulate: "સિમ્યુલેટ",
+    scale: "સ્કેલ (ગુજરાત)",
+  },
+  hi: {
+    heroBadge: "चक्रीय कार्बन इकोसिस्टम — निदान इंजन v2.1",
+    heroH1_1: "अनुमान लगाना बंद करें.",
+    heroH1_2: "सटीक ",
+    heroH1_highlight: "निदान शुरू करें",
+    heroSub: "ऊर्जा, सामग्री और कचरे को प्राथमिकता-आधारित, लागत-आकलित और CO₂-प्रमाणित चक्रीय कार्य योजना में बदलने वाला इंजन — भारतीय उद्योगों एवं नियामकों के लिए।",
+    runDiag: "निःशुल्क निदान शुरू करें",
+    theMethod: "कार्यप्रणाली",
+    seeMethod: "कार्यप्रणाली देखें",
+    brandTitle1: "चक्रीय कार्बन",
+    brandTitle2: "इकोसिस्टम",
+    overview: "अवलोकन",
+    diagnose: "निदान",
+    simulate: "सिमुलेशन",
+    scale: "विस्तार (गुजरात)",
+  },
+};
+
+function Header({ onRun, lang, setLang }: { onRun: () => void; lang: Lang; setLang: (l: Lang) => void }) {
+  const t = I18N[lang] || I18N.en;
+  return (
+    <header className="fixed top-0 inset-x-0 z-40 flex items-center justify-between px-5 md:px-10 py-4">
+      <button onClick={() => scrollToId('hero')} className="flex items-center gap-3 text-left">
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none" className="text-glow shrink-0">
+          <circle cx="11" cy="11" r="8.2" stroke="currentColor" strokeWidth="1.4" />
+          <path d="M11 5.8V11l3.4 2.3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          <circle cx="11" cy="11" r="1.4" fill="currentColor" />
+        </svg>
+        <span className="font-mono text-[9px] leading-[1.5] tracking-[.3em] text-white/70">
+          {t.brandTitle1}<br /><span className="text-glow/80">{t.brandTitle2}</span>
+        </span>
+      </button>
+      <div className="flex items-center gap-4 md:gap-6">
+        {/* Language selector */}
+        <div className="flex items-center rounded border border-white/20 bg-black/50 p-0.5 font-mono text-[10px]">
+          {(['en', 'gu', 'hi'] as Lang[]).map((l) => (
+            <button
+              key={l}
+              onClick={() => setLang(l)}
+              className={`px-2 py-0.5 rounded transition-colors ${lang === l ? 'bg-glow text-[#04110A] font-bold' : 'text-white/50 hover:text-white'}`}
+            >
+              {l === 'en' ? 'EN' : l === 'gu' ? 'ગુજરાતી' : 'हिन्दी'}
+            </button>
+          ))}
+        </div>
+
+        <button onClick={() => scrollToId('diagnose')} className="hidden md:block font-mono text-[10px] tracking-[.28em] text-white/45 hover:text-glow transition-colors">
+          {t.theMethod}
+        </button>
+        <button onClick={onRun} className="ghost-btn rounded-[3px] px-4 py-2 font-mono text-[10px] tracking-[.22em]">
+          {lang === 'gu' ? 'ડાયગ્નોસ્ટિક શરૂ કરો' : lang === 'hi' ? 'डायग्नोस्टिक चलाएं' : 'RUN DIAGNOSTIC'}
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function PhaseRail({ lang }: { lang: Lang }) {
+  const [idx, setIdx] = useState(0);
+  const t = I18N[lang] || I18N.en;
+  const items = [
+    { id: 'hero', l: t.overview }, { id: 'diagnose', l: t.diagnose },
+    { id: 'simulate', l: t.simulate }, { id: 'scale', l: t.scale },
+  ];
+  useEffect(() => {
+    let raf = 0, cur = -1;
+    const tick = () => {
+      const p = store.progress;
+      const i = p < 0.16 ? 0 : p < 0.4 ? 1 : p < 0.66 ? 2 : 3;
+      if (i !== cur) { cur = i; setIdx(i); }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  return (
+    <nav className="fixed right-5 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-5">
+      {items.map((it, i) => (
+        <button key={it.id} onClick={() => scrollToId(it.id)} className="flex items-center justify-end gap-3 group">
+          <span className={`font-mono text-[9px] tracking-[.28em] transition-colors ${idx === i ? 'text-glow' : 'text-white/30 group-hover:text-white/60'}`}>{it.l}</span>
+          <span className={`block h-px transition-all duration-300 ${idx === i ? 'w-8 bg-glow shadow-[0_0_8px_rgba(0,255,136,.8)]' : 'w-4 bg-white/25 group-hover:bg-white/50'}`} />
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+/* ============================================================
+   DOM — Live simulation readouts
+   ============================================================ */
+function LiveSlider({ fix, setFix, runOptimizer }: { fix: number; setFix: (v: number) => void; runOptimizer: () => void }) {
+  const saved = (fix * 0.145).toFixed(1);
+  const co2 = Math.round(fix * 0.32);
+  const payback = fix === 0 ? '———' : (22 - fix * 0.155).toFixed(1) + ' MO';
+  const status = fix === 0
+    ? { c: 'text-hot', dot: 'bg-hot', t: 'BASELINE — COMBUSTION LOSS DETECTED' }
+    : fix < 100
+      ? { c: 'text-[#FFB454]', dot: 'bg-[#FFB454]', t: 'PARTIAL MATCH — SOLVENT WASTE → FEEDSTOCK' }
+      : { c: 'text-glow', dot: 'bg-glow', t: 'CLOSED LOOP STABLE — EXPORTING LEDGER' };
+
+  return (
+    <div className="glass rounded-[4px] p-5 w-[min(92vw,380px)] pointer-events-auto">
+      <div className="flex items-center justify-between">
+        <span className="font-mono text-[10px] tracking-[.3em] text-glow">APPLY CIRCULAR FIX</span>
+        <span className="font-mono text-[10px] text-white/40">FIX {String(fix).padStart(3, '0')}%</span>
+      </div>
+      <h3 className="font-disp mt-2 text-lg text-white/90">Waste-to-Input Matching</h3>
+      <p className="font-mono mt-1 text-[10px] text-white/40">SOLVENT RECOVERY STREAM → FEEDSTOCK BUYER #2214</p>
+
+      <div className="relative h-10 mt-4 select-none">
+        <div className="absolute top-1/2 left-0 right-0 h-[2px] -translate-y-1/2 bg-white/10" />
+        <div className="absolute top-1/2 left-0 h-[2px] -translate-y-1/2 bg-glow shadow-[0_0_12px_rgba(0,255,136,.6)]" style={{ width: fix + '%' }} />
+        {[0, 25, 50, 75, 100].map((t) => (
+          <div key={t} className="absolute top-1/2 h-3 w-px -translate-y-1/2 bg-white/15" style={{ left: t + '%' }} />
+        ))}
+        <div
+          className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rotate-45 border border-glow bg-ink shadow-[0_0_16px_rgba(0,255,136,.8)] transition-[left] duration-75"
+          style={{ left: fix + '%' }}
+        />
+        <input
+          type="range" min={0} max={100} step={1} value={fix}
+          onChange={(e) => setFix(Number(e.target.value))}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize"
+          aria-label="Apply circular fix intensity"
+        />
+      </div>
+      <div className="flex justify-between font-mono text-[9px] text-white/30"><span>0%</span><span>50%</span><span>100%</span></div>
+
+      <div className="mt-5 space-y-3 font-mono text-[11px]">
+        <div className="flex items-baseline">
+          <span className="text-white/50 tracking-[.14em]">₹ SAVED / YR</span>
+          <span className="flex-1 mx-3 border-b border-dotted border-white/15 -translate-y-[3px]" />
+          <span className="text-glow text-lg leading-none">+{saved}L</span>
+        </div>
+        <div className="flex items-baseline">
+          <span className="text-white/50 tracking-[.14em]">CO₂ CUT</span>
+          <span className="flex-1 mx-3 border-b border-dotted border-white/15 -translate-y-[3px]" />
+          <span className="text-[#7CFFCB] text-lg leading-none">−{co2}%</span>
+        </div>
+        <div className="flex items-baseline">
+          <span className="text-white/50 tracking-[.14em]">PAYBACK</span>
+          <span className="flex-1 mx-3 border-b border-dotted border-white/15 -translate-y-[3px]" />
+          <span className="text-white/80">{payback}</span>
+        </div>
+      </div>
+
+      <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+        <span className={`font-mono text-[9px] tracking-[.12em] flex items-center gap-2 ${status.c}`}>
+          <i className={`w-1.5 h-1.5 rounded-full ${status.dot} inline-block`} />{status.t}
+        </span>
+        <button onClick={runOptimizer} className="font-mono text-[10px] tracking-[.18em] text-glow hover:text-white transition-colors shrink-0">
+          RUN OPTIMIZER →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   DOM — Quick diagnostic modal (fully client-side calculator)
+   ============================================================ */
+const SUBS: Record<string, { label: string }> = {
+  dyeing: { label: 'Textile dyeing' }, forging: { label: 'Forging & foundry' },
+  food: { label: 'Food processing' }, chem: { label: 'Chemicals & pharma' },
+};
+const FUELS: Record<string, { label: string }> = {
+  'furnace-oil': { label: 'Furnace oil' }, coal: { label: 'Coal / briquette' },
+  biomass: { label: 'Biomass' }, grid: { label: 'Grid / electric' },
+};
+const SUB_M: Record<string, number> = { dyeing: 1.15, forging: 1.4, food: 0.9, chem: 1.25 };
+const FUEL_M: Record<string, number> = { 'furnace-oil': 1.3, coal: 1.45, biomass: 0.75, grid: 0.55 };
+
+function computePlan(sub: string, spend: number, fuel: string) {
+  const m = SUB_M[sub] * FUEL_M[fuel];
+  const annual = spend * 12; // ₹ lakh / yr
+  const rows = [
+    { title: 'Waste-heat recovery on thermal loop', save: annual * 0.016 * m, co2K: 9.8, payB: 16 },
+    { title: 'Waste-to-input matching (by-product exchange)', save: annual * 0.011 * m * 1.05, co2K: 13.5, payB: 9 },
+    { title: 'Compressed-air & steam-trap purge', save: annual * 0.0058 * m, co2K: 8.2, payB: 3.5 },
+  ].map((r) => ({ title: r.title, save: r.save, co2: Math.round(r.save * r.co2K), pay: (r.payB / m).toFixed(1) }));
+  return {
+    rows,
+    total: rows.reduce((a, r) => a + r.save, 0),
+    totalCo2: rows.reduce((a, r) => a + r.co2, 0),
+  };
+}
+
+function DiagnosticModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [sub, setSub] = useState('dyeing');
+  const [spend, setSpend] = useState(12);
+  const [fuel, setFuel] = useState('furnace-oil');
+  const [done, setDone] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', h);
+    document.body.style.overflow = 'hidden';
+    return () => { window.removeEventListener('keydown', h); document.body.style.overflow = ''; };
+  }, [open, onClose]);
+  useEffect(() => { if (open) { setDone(false); setCopied(false); } }, [open]);
+
+  const plan = useMemo(() => computePlan(sub, spend, fuel), [sub, spend, fuel]);
+  if (!open) return null;
+
+  const copy = () => {
+    const txt = [
+      'CIRCULAR CARBON — DIAGNOSTIC PREVIEW',
+      SUBS[sub].label + ' · ' + FUELS[fuel].label + ' · ₹' + spend + 'L/mo energy & feedstock', '',
+      ...plan.rows.map((r, i) => (i + 1) + '. ' + r.title + ' — ₹' + r.save.toFixed(1) + 'L/yr · −' + r.co2 + ' tCO2/yr · payback ' + r.pay + ' mo'), '',
+      'TOTAL: +₹' + plan.total.toFixed(1) + 'L/yr · −' + plan.totalCo2 + ' tCO2/yr',
+    ].join('\n');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(txt).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2200); });
+    }
+  };
+
+  const seg = (active: boolean) =>
+    'font-mono text-[11px] px-3 py-2 rounded-[3px] border transition-colors text-left ' +
+    (active ? 'border-glow text-glow bg-glow/10' : 'border-white/15 text-white/50 hover:border-white/40');
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="glass modalin rounded-[4px] relative w-full max-w-md p-6 max-h-[88vh] overflow-y-auto">
+        <button onClick={onClose} aria-label="Close" className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-white/40 hover:text-glow transition-colors">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M1 1l12 12M13 1L1 13" /></svg>
+        </button>
+
+        {!done ? (
+          <>
+            <div className="font-mono text-[10px] tracking-[.3em] text-glow">QUICK DIAGNOSTIC — PREVIEW</div>
+            <p className="font-disp mt-2 text-lg text-white/90">Three inputs. A ranked plan.</p>
+            <div className="mt-6 space-y-5">
+              <div>
+                <div className="font-mono text-[10px] tracking-[.25em] text-white/40 mb-2">SUB-SECTOR</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {Object.entries(SUBS).map(([k, v]) => (
+                    <button key={k} onClick={() => setSub(k)} className={seg(sub === k)}>{v.label}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between font-mono text-[10px] tracking-[.25em] text-white/40 mb-2">
+                  <span>ENERGY & FEEDSTOCK SPEND</span><span className="text-glow">₹{spend}L / MO</span>
+                </div>
+                <input type="range" min={2} max={40} value={spend} onChange={(e) => setSpend(Number(e.target.value))}
+                  className="w-full accent-[#00FF88]" aria-label="Monthly spend in lakh rupees" />
+                <div className="flex justify-between font-mono text-[9px] text-white/30 mt-1"><span>₹2L</span><span>₹40L</span></div>
+              </div>
+              <div>
+                <div className="font-mono text-[10px] tracking-[.25em] text-white/40 mb-2">PRIMARY FUEL</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {Object.entries(FUELS).map(([k, v]) => (
+                    <button key={k} onClick={() => setFuel(k)} className={seg(fuel === k)}>{v.label}</button>
+                  ))}
+                </div>
+              </div>
+              <button onClick={() => setDone(true)} className="btn-primary w-full rounded-[3px] py-3.5 font-disp font-semibold text-[15px] flex items-center justify-center gap-2">
+                Generate Plan Preview
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M2 8h11M9 3.5 13.5 8 9 12.5" /></svg>
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="font-mono text-[10px] tracking-[.3em] text-glow">DIAGNOSTIC PREVIEW — RANKED ACTIONS</div>
+            <div className="font-mono text-[10px] text-white/40 mt-1">{SUBS[sub].label} · {FUELS[fuel].label} · ₹{spend}L/mo</div>
+            <div className="mt-5 space-y-4">
+              {plan.rows.map((r, i) => (
+                <div key={r.title}>
+                  <div className="flex items-baseline gap-3">
+                    <span className="font-mono text-glow text-[11px]">0{i + 1}</span>
+                    <span className="font-disp text-[14px] text-white/85 leading-snug">{r.title}</span>
+                  </div>
+                  <div className="font-mono mt-1.5 flex items-baseline text-[11px] whitespace-nowrap">
+                    <span className="text-glow">₹{r.save.toFixed(1)}L/yr</span>
+                    <span className="flex-1 mx-3 border-b border-dotted border-white/15" />
+                    <span className="text-[#7CFFCB]">−{r.co2} tCO₂</span>
+                    <span className="flex-1 mx-3 border-b border-dotted border-white/15" />
+                    <span className="text-white/50">{r.pay} mo</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 p-3 border border-glow/25 rounded-[3px] font-mono text-[11px] flex flex-wrap gap-y-1 justify-between items-center">
+              <span className="text-white/50 tracking-[.2em]">TOTAL LEDGER</span>
+              <span><span className="text-glow">+₹{plan.total.toFixed(1)}L/yr</span><span className="text-white/30 mx-2">·</span><span className="text-[#7CFFCB]">−{plan.totalCo2} tCO₂/yr</span></span>
+            </div>
+            <div className="mt-5 flex items-center gap-4">
+              <button onClick={copy} className="ghost-btn rounded-[3px] px-4 py-2.5 font-mono text-[10px] tracking-[.2em] flex items-center gap-2">
+                {copied && <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M1.5 6.5 4.5 9.5 10.5 2.5" /></svg>}
+                {copied ? 'COPIED' : 'COPY PLAN SUMMARY'}
+              </button>
+              <button onClick={() => setDone(false)} className="font-mono text-[10px] text-white/40 hover:text-white transition-colors">← EDIT INPUTS</button>
+            </div>
+            <p className="font-mono mt-4 text-[9px] text-white/30 leading-relaxed">
+              PREVIEW ≈ 70% OF FULL AUDIT PRECISION. THE FULL RUN INGESTS 41 DAYS OF METER DATA — NO SITE VISIT.
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   App — fixed canvas + scrolling overlay driven by one scrubbed timeline
+   ============================================================ */
+function App() {
+  const [fix, setFixState] = useState(0);
+  const [modal, setModal] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [lang, setLangState] = useState<Lang>(() => {
+    try {
+      const s = localStorage.getItem('cci_language');
+      if (s === 'en' || s === 'gu' || s === 'hi') return s as Lang;
+    } catch {}
+    return 'en';
+  });
+
+  const setLang = (l: Lang) => {
+    setLangState(l);
+    try { localStorage.setItem('cci_language', l); } catch {}
+  };
+
+  const t = I18N[lang] || I18N.en;
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  const setFix = useCallback((v: number) => { setFixState(v); store.fix = v / 100; }, []);
+  const runOptimizer = useCallback(() => {
+    const o = { v: fix };
+    gsap.killTweensOf(o);
+    gsap.to(o, { v: 100, duration: 1.9, ease: 'power2.inOut', onUpdate: () => setFix(Math.round(o.v)) });
+  }, [fix, setFix]);
+
+  useEffect(() => {
+    history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      // entrance
+      gsap.to(store, { intro: 1, duration: 1.8, ease: 'power3.out', delay: 0.2 });
+      gsap.to(store, { introZ: 0, duration: 2.2, ease: 'power3.out', delay: 0.2 });
+      gsap.from('[data-hero-stagger]', { y: 34, autoAlpha: 0, duration: 0.95, ease: 'power3.out', stagger: 0.09, delay: 0.35 });
+
+      // MASTER scroll timeline (scrubbed across the entire page)
+      const tl = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: '#scroll-root', start: 'top top', end: 'bottom bottom', scrub: 1.1,
+          onUpdate(self) { store.progress = self.progress; },
+        },
+      });
+      tl
+        // Phase 1 — dive into the node, isolate the leak
+        .to(store.cam, { x: 0.55, y: -0.12, z: 2.05, tx: 1.55, ty: 0.05, tz: 0, duration: 30, ease: 'power1.inOut' }, 3)
+        .to(store, { leak: 1, duration: 16, ease: 'power2.in' }, 8)
+        // Phase 2 — pull into the fix framing
+        .to(store.cam, { x: 3.15, y: 1.55, z: 4.9, tx: -0.2, ty: 0.1, tz: 0, duration: 13, ease: 'power1.inOut' }, 38)
+        // Phase 3 — extreme pull-back to the state-level rollup
+        .to(store.cam, { x: 0, y: 98, z: 82, tx: 0, ty: 0, tz: 5, duration: 19, ease: 'power2.inOut' }, 66)
+        .to(store, { scale: 1, duration: 21, ease: 'power1.in' }, 68)
+        .to(store, { machineScale: 0.16, duration: 17, ease: 'power1.inOut' }, 68)
+        .to(store.cam, { y: 96, duration: 12 }, 88);
+
+      // hero copy drifts away as the dive starts
+      gsap.to('#hero-inner', { autoAlpha: 0, y: -70, ease: 'none', scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom 70%', scrub: true } });
+
+      // generic overlay in/out per section (scrubbed = welded to scroll)
+      (gsap.utils.toArray('[data-overlay]') as HTMLElement[]).forEach((el) => {
+        const sec = el.closest('section');
+        if (!sec) return;
+        gsap.fromTo(el, { autoAlpha: 0, y: 36 }, { autoAlpha: 1, y: 0, ease: 'none', scrollTrigger: { trigger: sec, start: 'top 55%', end: 'top 15%', scrub: true } });
+        gsap.to(el, { autoAlpha: 0, y: -26, ease: 'none', scrollTrigger: { trigger: sec, start: 'bottom bottom', end: 'bottom 60%', scrub: true } });
+      });
+
+      // annotation leader-line draw-in
+      gsap.fromTo('#leader-line', { scaleX: 0 }, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: '#diagnose', start: 'top 45%', end: 'top 12%', scrub: true } });
+    }, rootRef);
+
+    document.getElementById('boot')?.remove();
+    const t = window.setTimeout(() => setReady(true), 80);
+    const onLoad = () => ScrollTrigger.refresh();
+    window.addEventListener('load', onLoad);
+    return () => { window.removeEventListener('load', onLoad); window.clearTimeout(t); ctx.revert(); };
+  }, []);
+
+  // window-level pointer parallax (works even though overlays sit above the canvas)
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const mv = (e: PointerEvent) => {
+      store.px = (e.clientX / window.innerWidth) * 2 - 1;
+      store.py = -((e.clientY / window.innerHeight) * 2 - 1);
+    };
+    window.addEventListener('pointermove', mv);
+    return () => window.removeEventListener('pointermove', mv);
+  }, []);
+
+  return (
+    <div ref={rootRef}>
+      {/* FIXED 3D CANVAS */}
+      <div className={`fixed inset-0 z-0 transition-opacity duration-[1200ms] ${ready ? 'opacity-100' : 'opacity-0'}`}>
+        <Canvas dpr={[1, 2]} camera={{ fov: 42, near: 0.1, far: 600, position: [0, 0.9, 7.6] }} gl={{ antialias: true, powerPreference: 'high-performance' }}>
+          <Scene />
+        </Canvas>
+      </div>
+
+      <Header onRun={openMvp} lang={lang} setLang={setLang} />
+      <PhaseRail lang={lang} />
+
+      <main id="scroll-root" className="relative z-10">
+        {/* ============ 00 · HERO ============ */}
+        <section id="hero" className="relative h-screen">
+          <div id="hero-inner" className="h-full flex flex-col justify-center px-6 md:px-14 max-w-[760px]">
+            <p data-hero-stagger className="font-mono text-[10px] md:text-[11px] tracking-[.35em] text-glow/80">
+              {t.heroBadge}
+            </p>
+            <h1 data-hero-stagger className="mt-5 font-disp font-semibold leading-[.98] tracking-tight text-[clamp(2.7rem,6.5vw,5.4rem)]">
+              {t.heroH1_1}<br />{t.heroH1_2}<span className="text-glow">{t.heroH1_highlight}</span><span className="text-glow">.</span>
+            </h1>
+            <p data-hero-stagger className="mt-6 max-w-[46ch] text-white/60 text-[15px] md:text-base leading-relaxed">
+              {t.heroSub}
+            </p>
+            <div data-hero-stagger className="mt-9 flex flex-wrap items-center gap-6">
+              <button onClick={openMvp} className="btn-primary rounded-[3px] px-7 py-3.5 font-disp font-semibold text-[15px] flex items-center gap-2.5">
+                {t.runDiag}
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M2 8h11M9 3.5 13.5 8 9 12.5" /></svg>
+              </button>
+              <button onClick={() => scrollToId('diagnose')} className="font-mono text-[10px] tracking-[.28em] text-white/50 hover:text-glow transition-colors">
+                {t.seeMethod}
+                <svg className="inline ml-2 -mt-0.5" width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 1v10M2 7.5 6 11l4-3.5" /></svg>
+              </button>
+            </div>
+            <div data-hero-stagger className="font-mono mt-14 text-[10px] tracking-[.22em] text-white/35 leading-loose">
+              23,412 HAZARDOUS-WASTE UNITS MAPPED · GUJARAT PILOT<br />
+              RANKED ACTIONS · ₹ LEDGER · CO₂ LEDGER · COMPLIANCE EXPORT
+            </div>
+            <div data-hero-stagger className="absolute bottom-7 inset-x-0 flex flex-col items-center gap-2">
+              <span className="font-mono text-[9px] tracking-[.45em] text-white/30">SCROLL</span>
+              <span className="block w-px h-9 bg-white/15 relative overflow-hidden">
+                <span className="cueline absolute inset-x-0 top-0 h-3 bg-glow" />
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* ============ 01 · DIAGNOSE ============ */}
+        <section id="diagnose" className="relative h-[230vh]">
+          <div className="sticky top-0 h-screen flex items-center pointer-events-none">
+            <div data-overlay className="relative ml-6 md:ml-14 max-w-sm">
+              <div className="glass rounded-[4px] p-5">
+                <div className="font-mono text-[10px] tracking-[.3em] text-hot">ROOT-CAUSE DIAGNOSIS</div>
+                <p className="font-disp mt-3 text-lg leading-snug text-white/90">
+                  High combustion inefficiency vs. sub-sector benchmark.
+                </p>
+                <div className="font-mono mt-4 space-y-1.5 text-[11px]">
+                  <div className="flex justify-between"><span className="text-white/40">Δ vs peer set</span><span className="text-hot">+18.4%</span></div>
+                  <div className="flex justify-between"><span className="text-white/40">confidence</span><span className="text-white/80">0.92</span></div>
+                  <div className="flex justify-between"><span className="text-white/40">asset</span><span className="text-white/80">ROTOR-GEAR A-3</span></div>
+                </div>
+                <div className="mt-4 h-px bg-white/10" />
+                <p className="font-mono mt-3 text-[9px] text-white/40 leading-relaxed tracking-[.12em]">
+                  FLAGGED FROM 41 DAYS OF METER DATA · NO SITE VISIT REQUIRED
+                </p>
+              </div>
+              {/* annotation leader pointing at the glowing gear */}
+              <div className="hidden md:block absolute left-full top-1/2 w-[15vw] h-6">
+                <div id="leader-line" className="absolute left-0 top-1/2 w-full h-px bg-hot/50 origin-left" />
+                <div className="dotpulse absolute right-0 top-1/2 -translate-y-1/2 w-[7px] h-[7px] bg-hot text-hot" />
+                <div className="absolute right-0 -top-1 font-mono text-[9px] text-hot tracking-[.2em]">A-3</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ============ 02 · RECOMMEND & SIMULATE ============ */}
+        <section id="simulate" className="relative h-[280vh]">
+          <div className="sticky top-0 h-screen pointer-events-none">
+            <div data-overlay className="h-full flex items-center justify-between px-6 md:px-14 gap-8">
+              <div className="max-w-xs hidden md:block">
+                <div className="font-mono text-[10px] tracking-[.3em] text-glow/80">02 — RECOMMEND & SIMULATE</div>
+                <p className="font-disp mt-3 text-xl leading-snug text-white/85">
+                  Drag the fix. Watch the ledger move before you spend a rupee.
+                </p>
+                <p className="font-mono mt-4 text-[10px] text-white/40 leading-relaxed tracking-[.1em]">
+                  EVERY VALUE ON THIS PANEL IS COMPUTED BY THE SAME ENGINE THAT WRITES THE COMPLIANCE FILE.
+                </p>
+              </div>
+              <LiveSlider fix={fix} setFix={setFix} runOptimizer={runOptimizer} />
+            </div>
+          </div>
+        </section>
+
+        {/* ============ 03 · SCALE ============ */}
+        <section id="scale" className="relative h-[240vh]">
+          <div className="sticky top-0 h-screen flex items-end pointer-events-none">
+            <div data-overlay className="px-6 md:px-14 pb-16 md:pb-20 max-w-2xl">
+              <div className="font-mono text-[10px] tracking-[.3em] text-glow/80">03 — SCALE</div>
+              <h2 className="font-disp mt-3 text-[clamp(1.6rem,3.6vw,2.9rem)] leading-tight text-white/90">
+                Scale: state-level rollup for evidence-based targeting.
+              </h2>
+              <p className="mt-4 text-white/55 text-[15px] max-w-[52ch] leading-relaxed">
+                Every diagnosed plant becomes a point on the map. Cluster the ₹ and CO₂ potential,
+                write evidence-based targets, and stop inspecting blindly.
+              </p>
+              <div className="font-mono mt-6 flex flex-wrap gap-x-8 gap-y-2 text-[10px] tracking-[.18em] text-white/50">
+                <span className="flex items-center gap-2"><i className="w-2 h-2 bg-hot inline-block rotate-45" />LEAK FLAGGED</span>
+                <span className="flex items-center gap-2"><i className="w-2 h-2 bg-glow inline-block rotate-45" />CIRCULAR ACTION DEPLOYED</span>
+                <span className="flex items-center gap-2"><i className="w-2 h-2 bg-[#7CFFCB] inline-block rounded-full" />YOUR UNIT — PILOT CLUSTER</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ============ CTA ============ */}
+        <section id="cta" className="relative min-h-screen flex items-center">
+          <div data-overlay className="px-6 md:px-14 py-24 w-full">
+            <div className="flex flex-col lg:flex-row lg:items-end gap-12 justify-between">
+              <div className="max-w-xl">
+                <h2 className="font-disp font-semibold text-[clamp(2rem,5vw,4rem)] leading-[1.02]">
+                  Your waste stream has a buyer.<br />Your heat loss has a price.
+                </h2>
+                <p className="mt-5 text-white/55 max-w-[48ch] leading-relaxed">
+                  Run the free diagnostic on your own numbers. Three inputs, ninety seconds —
+                  a ranked plan you can act on, or export for the board.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-5 items-center">
+                  <button onClick={openMvp} className="btn-primary rounded-[3px] px-7 py-3.5 font-disp font-semibold text-[15px] flex items-center gap-2.5">
+                    Run Free Diagnostic
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M2 8h11M9 3.5 13.5 8 9 12.5" /></svg>
+                  </button>
+                  <a href="mailto:pilot@circularcarbon.eco" className="ghost-btn rounded-[3px] px-5 py-3 font-mono text-[11px] tracking-[.2em]">
+                    TALK TO THE PILOT TEAM
+                  </a>
+                </div>
+              </div>
+              <div className="font-mono text-[11px] text-white/45 space-y-2.5 shrink-0">
+                {['RANKED ACTION LIST', '₹ & CO₂ LEDGERS', 'SUB-SECTOR BENCHMARK', 'PCB-READY EXPORT'].map((li) => (
+                  <div key={li} className="flex items-center gap-3 justify-end">
+                    <span>{li}</span><span className="w-1.5 h-1.5 bg-glow rotate-45 inline-block" />
+                  </div>
+                ))}
+                <div className="pt-5 text-[9px] tracking-[.25em] text-white/25 text-right">
+                  CIRCULAR CARBON ECOSYSTEM · GUJARAT PILOT · 2025
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <DiagnosticModal open={modal} onClose={() => setModal(false)} />
+    </div>
+  );
+}
+
+createRoot(document.getElementById('root')!).render(<App />);
+</script>
+</body>
+</html>

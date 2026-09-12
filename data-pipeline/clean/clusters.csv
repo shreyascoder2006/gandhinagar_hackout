@@ -1,0 +1,10 @@
+id,name,district,lat,lon,dominant_sectors,source,confidence
+morbi,Morbi,Morbi,22.82,70.84,Ceramics,"Known GIDC ceramics cluster — see sources.md #5",real
+vapi,Vapi,Valsad,20.37,72.90,"Chemicals;Dyes & pigments","Known GIDC chemicals cluster — see sources.md #5",real
+ankleshwar,Ankleshwar,Bharuch,21.63,73.00,"Chemicals;Pharma","Known GIDC chemicals cluster — see sources.md #5",real
+surat,Surat,Surat,21.17,72.83,Textiles,"Known textile/dyeing cluster — see sources.md #5",real
+rajkot,Rajkot,Rajkot,22.30,70.80,"Engineering;Foundry","Known engineering/foundry cluster — see sources.md #5",real
+jamnagar,Jamnagar,Jamnagar,22.47,70.07,"Brass parts;Petrochemicals","Known brass-parts + petrochemical refinery cluster — see sources.md #5",real
+vatva,Vatva (Ahmedabad),Ahmedabad,22.96,72.62,"Chemicals;Textiles","Known GIDC Vatva chemicals/dyeing cluster — see sources.md #5",real
+dahej,Dahej,Bharuch,21.70,72.57,"Chemicals;Petrochemicals","Known Dahej PCPIR petrochemical SEZ cluster — see sources.md #5",real
+alang,Alang,Bhavnagar,21.43,72.19,"Ship recycling;Metal recovery","Known Alang ship-breaking/recycling yard — see sources.md #5",real

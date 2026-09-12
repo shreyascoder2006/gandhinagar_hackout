@@ -1,0 +1,163 @@
+{
+  "note": "Held-out labels for injected anomalous process-months. NOT present in factories_synthetic.json. For evaluating the Phase-3 anomaly detector's precision/recall against real labels instead of asserted numbers.",
+  "schema_version": "1.0.0",
+  "random_seed": 42,
+  "labels": [
+    {
+      "factory_id": "vapi-chemicals-08",
+      "process_id": "etp",
+      "month": "2025-07",
+      "injected_multiplier": 1.892
+    },
+    {
+      "factory_id": "vapi-chemicals-08",
+      "process_id": "etp",
+      "month": "2025-05",
+      "injected_multiplier": 1.892
+    },
+    {
+      "factory_id": "vatva-chemicals-07",
+      "process_id": "reactor",
+      "month": "2025-06",
+      "injected_multiplier": 1.994
+    },
+    {
+      "factory_id": "rajkot-engineering-04",
+      "process_id": "heat-treat",
+      "month": "2025-10",
+      "injected_multiplier": 1.845
+    },
+    {
+      "factory_id": "jamnagar-engineering-04",
+      "process_id": "compressor",
+      "month": "2026-01",
+      "injected_multiplier": 1.755
+    },
+    {
+      "factory_id": "jamnagar-engineering-04",
+      "process_id": "compressor",
+      "month": "2025-10",
+      "injected_multiplier": 1.755
+    },
+    {
+      "factory_id": "vapi-chemicals-06",
+      "process_id": "reactor",
+      "month": "2025-10",
+      "injected_multiplier": 1.576
+    },
+    {
+      "factory_id": "rajkot-engineering-01",
+      "process_id": "heat-treat",
+      "month": "2025-12",
+      "injected_multiplier": 1.405
+    },
+    {
+      "factory_id": "ankleshwar-chemicals-05",
+      "process_id": "column",
+      "month": "2025-08",
+      "injected_multiplier": 1.445
+    },
+    {
+      "factory_id": "ankleshwar-chemicals-05",
+      "process_id": "column",
+      "month": "2025-06",
+      "injected_multiplier": 1.445
+    },
+    {
+      "factory_id": "vatva-textiles-02",
+      "process_id": "compressor",
+      "month": "2025-09",
+      "injected_multiplier": 2.032
+    },
+    {
+      "factory_id": "vatva-chemicals-03",
+      "process_id": "etp",
+      "month": "2025-10",
+      "injected_multiplier": 1.456
+    },
+    {
+      "factory_id": "jamnagar-engineering-02",
+      "process_id": "sand-dryer",
+      "month": "2025-04",
+      "injected_multiplier": 1.462
+    },
+    {
+      "factory_id": "jamnagar-engineering-02",
+      "process_id": "sand-dryer",
+      "month": "2026-02",
+      "injected_multiplier": 1.462
+    },
+    {
+      "factory_id": "alang-engineering-01",
+      "process_id": "compressor",
+      "month": "2026-03",
+      "injected_multiplier": 1.824
+    },
+    {
+      "factory_id": "alang-engineering-01",
+      "process_id": "compressor",
+      "month": "2026-02",
+      "injected_multiplier": 1.824
+    },
+    {
+      "factory_id": "morbi-ceramics-08",
+      "process_id": "etp",
+      "month": "2025-08",
+      "injected_multiplier": 1.909
+    },
+    {
+      "factory_id": "surat-textiles-13",
+      "process_id": "compressor",
+      "month": "2025-09",
+      "injected_multiplier": 1.92
+    },
+    {
+      "factory_id": "rajkot-engineering-05",
+      "process_id": "compressor",
+      "month": "2025-11",
+      "injected_multiplier": 1.61
+    },
+    {
+      "factory_id": "morbi-ceramics-01",
+      "process_id": "compressor",
+      "month": "2025-12",
+      "injected_multiplier": 2.099
+    },
+    {
+      "factory_id": "morbi-ceramics-11",
+      "process_id": "dryer",
+      "month": "2026-01",
+      "injected_multiplier": 1.519
+    },
+    {
+      "factory_id": "vapi-chemicals-05",
+      "process_id": "column",
+      "month": "2025-10",
+      "injected_multiplier": 2.016
+    },
+    {
+      "factory_id": "vapi-chemicals-05",
+      "process_id": "column",
+      "month": "2025-11",
+      "injected_multiplier": 2.016
+    },
+    {
+      "factory_id": "ankleshwar-chemicals-02",
+      "process_id": "compressor",
+      "month": "2025-11",
+      "injected_multiplier": 2.008
+    },
+    {
+      "factory_id": "vapi-chemicals-01",
+      "process_id": "compressor",
+      "month": "2025-06",
+      "injected_multiplier": 1.499
+    },
+    {
+      "factory_id": "alang-engineering-03",
+      "process_id": "sand-dryer",
+      "month": "2025-04",
+      "injected_multiplier": 2.011
+    }
+  ]
+}

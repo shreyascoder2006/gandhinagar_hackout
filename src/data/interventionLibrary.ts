@@ -1,0 +1,74 @@
+import type { Intervention, ProcessNode } from "../types";
+
+// Curated circular-intervention library (BEE-UDIT-style). Each entry is a
+// template: CO₂ reduction is a % of the target process's emissions, CAPEX is
+// scaled by process size, saving is derived from avoided fuel/material cost.
+// Sources column is illustrative for the prototype and must be replaced with
+// document references when the library is finalised.
+
+export type ProcessKind = ProcessNode["kind"];
+
+export interface LibraryEntry {
+  key: string;
+  title: string;
+  category: Intervention["category"];
+  appliesTo: ProcessKind[];
+  sectors?: string[]; // undefined = any
+  reductionPct: number; // of process CO₂e
+  capexBaseInr: number; // for a ~2,000 tCO₂e/yr process; scaled by size
+  savingInrPerTco2: number; // ₹ saved per tCO₂e avoided (fuel/material proxy)
+  confidence: Intervention["confidence"];
+  circularityGainPct?: number;
+  description: string;
+  source: string;
+}
+
+export const interventionLibrary: LibraryEntry[] = [
+  // — thermal / kiln / furnace —
+  { key: "kiln-whr", title: "Waste-heat recovery from kiln cooling zone to dryer preheat", category: "heat-recovery", appliesTo: ["kiln"], reductionPct: 0.14, capexBaseInr: 6800000, savingInrPerTco2: 2260, confidence: "high", description: "Recover 180–250 °C cooling-zone air to preheat the dryer intake, cutting natural-gas use in drying.", source: "BEE UDIT — ceramics cluster case studies" },
+  { key: "kiln-loading", title: "Kiln car loading optimisation + firing curve retune", category: "process-change", appliesTo: ["kiln"], reductionPct: 0.065, capexBaseInr: 450000, savingInrPerTco2: 2900, confidence: "medium", description: "Raise loading density toward benchmark and shorten peak-zone dwell without quality loss.", source: "Cleaner-production audit norms (ceramics)" },
+  { key: "furnace-regen", title: "Regenerative burners / recuperator on furnace", category: "heat-recovery", appliesTo: ["furnace"], reductionPct: 0.18, capexBaseInr: 5200000, savingInrPerTco2: 2100, confidence: "high", description: "Preheat combustion air from flue gas; typical 15–25 % fuel saving on batch furnaces.", source: "BEE UDIT — foundry / forging" },
+  { key: "furnace-scrap", title: "Higher in-house scrap return + charge preheating", category: "recycling-loop", appliesTo: ["furnace"], reductionPct: 0.08, capexBaseInr: 900000, savingInrPerTco2: 3100, confidence: "medium", circularityGainPct: 0.06, description: "Close the loop on runners/risers and preheat charge with exhaust before melting.", source: "Foundry cluster energy audits" },
+  // — boilers / steam —
+  { key: "boiler-economiser", title: "Economiser + condensate recovery on steam boiler", category: "heat-recovery", appliesTo: ["boiler"], reductionPct: 0.12, capexBaseInr: 2800000, savingInrPerTco2: 2400, confidence: "high", description: "Recover flue-gas and condensate heat into feedwater; 8–15 % fuel saving.", source: "BEE PAT — boiler efficiency measures" },
+  { key: "boiler-biomass", title: "Co-fire agri-residue briquettes (waste biomass) in boiler", category: "material-substitution", appliesTo: ["boiler"], reductionPct: 0.3, capexBaseInr: 3500000, savingInrPerTco2: 900, confidence: "medium", circularityGainPct: 0.05, description: "Substitute a share of coal/gas with locally available agri-residue briquettes.", source: "MNRE biomass co-firing guidance" },
+  // — dryers —
+  { key: "dryer-moisture", title: "Inline moisture / density control on dryer feed", category: "process-change", appliesTo: ["dryer"], reductionPct: 0.05, capexBaseInr: 920000, savingInrPerTco2: 3050, confidence: "medium", description: "Tighten feed consistency to cut excess evaporation load.", source: "Cleaner-production audit norms" },
+  { key: "dryer-exhaust", title: "Exhaust-air recirculation on dryer / stenter", category: "heat-recovery", appliesTo: ["dryer"], reductionPct: 0.1, capexBaseInr: 1600000, savingInrPerTco2: 2300, confidence: "high", description: "Recirculate part of the hot exhaust; standard on stenters and spray dryers.", source: "BEE UDIT — textile stenters" },
+  // — compressed air —
+  { key: "air-leak", title: "Ultrasonic compressed-air leak audit (routine)", category: "process-change", appliesTo: ["compressor"], reductionPct: 0.04, capexBaseInr: 120000, savingInrPerTco2: 3700, confidence: "medium", description: "Quarterly leak detection recovers 5–8 % of losses even in well-run systems.", source: "BEE compressed-air best practice" },
+  { key: "air-vsd", title: "VSD retrofit on lead compressor", category: "process-change", appliesTo: ["compressor"], reductionPct: 0.12, capexBaseInr: 1100000, savingInrPerTco2: 3700, confidence: "high", description: "Match compressor output to demand instead of load/unload cycling.", source: "BEE UDIT — utilities" },
+  // — process lines —
+  { key: "glaze-recycle", title: "Recycle glaze overspray into base slip (closed loop)", category: "recycling-loop", appliesTo: ["generic"], sectors: ["Ceramics"], reductionPct: 0.07, capexBaseInr: 380000, savingInrPerTco2: 5400, confidence: "medium", circularityGainPct: 0.05, description: "Capture and reintroduce overspray instead of disposing as waste.", source: "Ceramics cluster CP audits" },
+  { key: "dye-reuse", title: "Dye-bath reuse + caustic recovery", category: "recycling-loop", appliesTo: ["generic"], sectors: ["Textiles"], reductionPct: 0.09, capexBaseInr: 1400000, savingInrPerTco2: 4100, confidence: "medium", circularityGainPct: 0.07, description: "Reuse dye liquor for successive batches; recover caustic from mercerising.", source: "Textile cluster CP audits (Surat)" },
+  { key: "solvent-recovery", title: "Solvent recovery still (closed loop)", category: "recycling-loop", appliesTo: ["generic"], sectors: ["Chemicals"], reductionPct: 0.11, capexBaseInr: 2600000, savingInrPerTco2: 6200, confidence: "high", circularityGainPct: 0.08, description: "Distil and reuse spent solvent instead of incinerating or sending to TSDF.", source: "GPCB CP guidance — chemicals" },
+  { key: "heat-treat-sched", title: "Batch consolidation on heat-treatment cycles", category: "process-change", appliesTo: ["generic"], sectors: ["Engineering"], reductionPct: 0.06, capexBaseInr: 150000, savingInrPerTco2: 3000, confidence: "medium", description: "Fill furnaces to capacity per cycle; fewer, fuller cycles.", source: "Foundry cluster energy audits" },
+  // — effluent / waste —
+  { key: "etp-sludge-symbiosis", title: "Waste-to-input: ETP sludge → nearby brick/block units", category: "waste-to-input", appliesTo: ["effluent"], reductionPct: 0.2, capexBaseInr: 260000, savingInrPerTco2: 2500, confidence: "low", circularityGainPct: 0.09, description: "Dewatered sludge substitutes part of the raw material at nearby brick/block units.", source: "Industrial-symbiosis pilot literature (India)" },
+  { key: "etp-biogas", title: "Anaerobic pre-treatment with biogas capture", category: "waste-to-input", appliesTo: ["effluent"], reductionPct: 0.25, capexBaseInr: 3200000, savingInrPerTco2: 1800, confidence: "medium", circularityGainPct: 0.06, description: "Capture methane from high-COD effluent and use it in the boiler.", source: "CPCB CETP guidance" },
+  { key: "etp-water-reuse", title: "Tertiary treatment + process water reuse", category: "recycling-loop", appliesTo: ["effluent"], reductionPct: 0.08, capexBaseInr: 1900000, savingInrPerTco2: 2100, confidence: "medium", circularityGainPct: 0.04, description: "Reuse treated effluent for non-critical process water; cuts fresh-water pumping.", source: "CGWB industrial water guidance" },
+];
+
+/** Instantiate library templates for a specific process. */
+export function interventionsFor(node: Pick<ProcessNode, "id" | "kind" | "co2eTpy">, sector: string): Intervention[] {
+  const sizeScale = Math.max(0.35, Math.min(2.5, node.co2eTpy / 2000));
+  return interventionLibrary
+    .filter((e) => e.appliesTo.includes(node.kind) && (!e.sectors || e.sectors.includes(sector)))
+    .map((e) => {
+      const co2 = Math.round(node.co2eTpy * e.reductionPct);
+      const capex = Math.round(e.capexBaseInr * sizeScale);
+      const saving = Math.round(co2 * e.savingInrPerTco2);
+      return {
+        id: `${node.id}:${e.key}`,
+        title: e.title,
+        category: e.category,
+        capexInr: capex,
+        annualSavingInr: saving,
+        co2ReductionTpy: co2,
+        paybackMonths: saving > 0 ? Math.max(1, Math.round((capex / saving) * 12)) : 999,
+        confidence: e.confidence,
+        description: e.description,
+        circularityGainPct: e.circularityGainPct,
+      };
+    });
+}
