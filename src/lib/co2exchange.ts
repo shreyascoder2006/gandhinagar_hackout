@@ -46,6 +46,11 @@ export function co2Deals(provider: Factory, factories: Factory[]): Co2ExchangeDe
       id: `${provider.id}→${recipient.id}:co2`, providerId: provider.id, recipientId: recipient.id,
       availableTpy: available, requestedTpy: demand.tonnes, matchedTpy: matched,
       distanceKm: Math.round(distance * 10) / 10,
+      // ₹1,450/t here is an illustrative CAPTURED-CO2-as-feedstock price (a
+      // buyer paying for delivered CO2 for carbonation/dry-ice/EOR-type use),
+      // a DIFFERENT market from the ₹900/t CCTS-indicative compliance-credit
+      // price in backend/app/carbon_credit.py (paid for AVOIDED emissions).
+      // Both are illustrative; they are not meant to be the same number.
       estimatedValueInr: matched * 1450,
       useCase: demand.useCase,
       captureSource: source?.label ?? "process flue gas",

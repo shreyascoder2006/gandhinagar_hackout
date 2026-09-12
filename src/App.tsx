@@ -9,6 +9,10 @@ import PortfolioPage from "./pages/PortfolioPage";
 import IntakePage from "./pages/IntakePage";
 import Co2ExchangePage from "./pages/Co2ExchangePage";
 import Co2DealPage from "./pages/Co2DealPage";
+import ReportPage from "./pages/ReportPage";
+import BrsrReportPage from "./pages/BrsrReportPage";
+import ConsentLedgerPage from "./pages/ConsentLedgerPage";
+import DeveloperApiPage from "./pages/DeveloperApiPage";
 import JarvisAssistant from "./components/assistant/JarvisAssistant";
 import { useFactoryStore } from "./store/useFactoryStore";
 
@@ -59,6 +63,10 @@ function App() {
           <Route path="/intake/:factoryId" element={<IntakePage />} />
           <Route path="/co2-exchange" element={<Co2ExchangePage />} />
           <Route path="/co2-exchange/deal/:providerId/:recipientId" element={<Co2DealPage />} />
+          <Route path="/report/:factoryId" element={<ReportPage />} />
+          <Route path="/report/:factoryId/brsr" element={<BrsrReportPage />} />
+          <Route path="/consent" element={<ConsentLedgerPage />} />
+          <Route path="/developer" element={<DeveloperApiPage />} />
         </Routes>
         <JarvisAssistant />
       </div>

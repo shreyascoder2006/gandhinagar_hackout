@@ -7,6 +7,11 @@ import { formatInr } from "../lib/severity";
 const TRUCK_CAPACITY_T = 20;
 const CAPTURE_COST_PER_T = 360;
 const FREIGHT_PER_KM = 72;
+// Brokerage revenue model, shown operating inside the actual transaction
+// flow (not described afterward in a pitch deck): a facilitation fee on the
+// supplier's net proceeds once a deal is accepted, illustrative — no real
+// payment processing exists here.
+const FACILITATION_FEE_PCT = 0.02;
 
 export default function Co2DealPage() {
   const { providerId, recipientId } = useParams();
@@ -28,7 +33,9 @@ export default function Co2DealPage() {
   const materialValue = deal.matchedTpy * price;
   const captureCost = deal.matchedTpy * CAPTURE_COST_PER_T;
   const buyerTotal = materialValue + freight;
-  const supplierNet = materialValue - captureCost - freight;
+  const grossSupplierNet = materialValue - captureCost - freight;
+  const facilitationFee = accepted ? Math.max(0, grossSupplierNet) * FACILITATION_FEE_PCT : 0;
+  const supplierNet = grossSupplierNet - facilitationFee;
   const frequencyLabel = { weekly: "weekly", fortnightly: "every two weeks", monthly: "monthly" }[frequency];
 
   return <main className="flex flex-1 flex-col gap-4 overflow-auto p-4 lg:p-6">
@@ -38,7 +45,7 @@ export default function Co2DealPage() {
 
     <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
       <section className="glass rounded-xl p-4"><h3 className="text-sm font-semibold">Proposed exchange</h3><div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4"><Stat label="Annual CO₂" value={`${deal.matchedTpy.toLocaleString("en-IN")} t`} /><Stat label="Route" value={`${deal.distanceKm} km`} /><Stat label="Load capacity" value={`${payload.toLocaleString("en-IN")} t/run`} /><Stat label="Projected runs" value={`${deliveries}/yr`} /></div><div className="mt-4 rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel-2)] p-3 text-[11px]"><div className="font-semibold">Technical review checklist</div><div className="mt-2 grid gap-2 sm:grid-cols-2 text-[color:var(--color-muted)]"><span>□ Flue-gas composition and purity test</span><span>□ Capture / liquefaction suitability</span><span>□ Tanker, cylinder and unloading protocol</span><span>□ GPCB consent and site safety review</span></div></div></section>
-      <section className="glass rounded-xl p-4"><h3 className="text-sm font-semibold">Deal economics</h3><FinanceRow label={`CO₂ product: ${deal.matchedTpy.toLocaleString("en-IN")} t × ${formatInr(price)}/t`} value={materialValue} /><FinanceRow label={`Capture & conditioning: ${formatInr(CAPTURE_COST_PER_T)}/t`} value={-captureCost} /><FinanceRow label={`${deliveries} round trips · ${roundTrips.toLocaleString("en-IN")} vehicle-km`} value={-freight} /><div className="mt-3 grid grid-cols-2 gap-2 border-t border-[color:var(--color-border)] pt-3"><div><div className="text-[10px] text-[color:var(--color-muted)]">Supplier net estimate</div><div className={`text-lg font-semibold ${supplierNet >= 0 ? "text-[color:var(--color-ok)]" : "text-[color:var(--color-crit)]"}`}>{formatInr(supplierNet)}/yr</div></div><div><div className="text-[10px] text-[color:var(--color-muted)]">Offtaker delivered cost</div><div className="text-lg font-semibold">{formatInr(buyerTotal)}/yr</div></div></div></section>
+      <section className="glass rounded-xl p-4"><h3 className="text-sm font-semibold">Deal economics</h3><FinanceRow label={`CO₂ product: ${deal.matchedTpy.toLocaleString("en-IN")} t × ${formatInr(price)}/t`} value={materialValue} /><FinanceRow label={`Capture & conditioning: ${formatInr(CAPTURE_COST_PER_T)}/t`} value={-captureCost} /><FinanceRow label={`${deliveries} round trips · ${roundTrips.toLocaleString("en-IN")} vehicle-km`} value={-freight} />{accepted && <FinanceRow label={`Platform facilitation fee (${(FACILITATION_FEE_PCT * 100).toFixed(0)}% of first-year supplier net, illustrative)`} value={-facilitationFee} />}<div className="mt-3 grid grid-cols-2 gap-2 border-t border-[color:var(--color-border)] pt-3"><div><div className="text-[10px] text-[color:var(--color-muted)]">Supplier net estimate</div><div className={`text-lg font-semibold ${supplierNet >= 0 ? "text-[color:var(--color-ok)]" : "text-[color:var(--color-crit)]"}`}>{formatInr(supplierNet)}/yr</div></div><div><div className="text-[10px] text-[color:var(--color-muted)]">Offtaker delivered cost</div><div className="text-lg font-semibold">{formatInr(buyerTotal)}/yr</div></div></div></section>
     </div>
 
     {!accepted ? <section className="glass rounded-xl p-5 text-center"><h3 className="text-base font-semibold">Ready to take this proposal forward?</h3><p className="mx-auto mt-1 max-w-xl text-[12px] text-[color:var(--color-muted)]">Accepting opens the commercial specification workspace. It does not place an order or send information to another party.</p><div className="mt-4 flex justify-center gap-2"><Link to="/co2-exchange" className="rounded-lg border border-[color:var(--color-border)] px-4 py-2 text-sm">Return to network</Link><button onClick={() => setAccepted(true)} className="rounded-lg bg-[color:var(--color-ok)] px-4 py-2 text-sm font-semibold text-black">Accept & configure deal</button></div></section> :

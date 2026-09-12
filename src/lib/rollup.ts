@@ -1,6 +1,6 @@
 import type { Factory, Intervention } from "../types";
 import { clusters, type Cluster } from "../data/clusters";
-import { findMatches, type SymbiosisMatch } from "./symbiosis";
+import type { SymbiosisMatch } from "./symbiosis";
 
 // Regulator rollup — mirrors backend/app/aggregation. Anonymised: no factory
 // ids or names leave this module; any cell with fewer than MIN_CELL factories
@@ -73,8 +73,7 @@ function sectorKey(f: Factory): string {
   return f.sector.split(" — ")[0];
 }
 
-export function rollup(factories: Factory[]): StateRollup {
-  const matches = findMatches(factories);
+export function rollup(factories: Factory[], matches: SymbiosisMatch[]): StateRollup {
 
   const clusterRollups: ClusterRollup[] = clusters
     .map((c) => {

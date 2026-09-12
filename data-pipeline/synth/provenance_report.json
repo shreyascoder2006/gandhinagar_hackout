@@ -19,7 +19,7 @@
     "Textiles": 24,
     "Engineering": 29
   },
-  "injected_anomaly_count": 26,
+  "injected_anomaly_count": 23,
   "injected_anomaly_factory_count": 20,
   "field_provenance": {
     "cluster_geography": "real (see clean/clusters.csv, sources.md #5)",

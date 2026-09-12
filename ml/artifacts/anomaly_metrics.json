@@ -1,0 +1,149 @@
+{
+  "per_equipment_mad_sweep": [
+    {
+      "strategy": "per_equipment_mad",
+      "mad_multiplier": 1.5,
+      "tp": 16,
+      "fp": 1580,
+      "fn": 10,
+      "precision": 0.01,
+      "recall": 0.615
+    },
+    {
+      "strategy": "per_equipment_mad",
+      "mad_multiplier": 2.0,
+      "tp": 14,
+      "fp": 1315,
+      "fn": 12,
+      "precision": 0.011,
+      "recall": 0.538
+    },
+    {
+      "strategy": "per_equipment_mad",
+      "mad_multiplier": 2.5,
+      "tp": 13,
+      "fp": 1081,
+      "fn": 13,
+      "precision": 0.012,
+      "recall": 0.5
+    },
+    {
+      "strategy": "per_equipment_mad",
+      "mad_multiplier": 3.0,
+      "tp": 13,
+      "fp": 918,
+      "fn": 13,
+      "precision": 0.014,
+      "recall": 0.5
+    },
+    {
+      "strategy": "per_equipment_mad",
+      "mad_multiplier": 3.5,
+      "tp": 13,
+      "fp": 753,
+      "fn": 13,
+      "precision": 0.017,
+      "recall": 0.5
+    },
+    {
+      "strategy": "per_equipment_mad",
+      "mad_multiplier": 4.0,
+      "tp": 13,
+      "fp": 631,
+      "fn": 13,
+      "precision": 0.02,
+      "recall": 0.5
+    }
+  ],
+  "global_percentile_sweep": [
+    {
+      "strategy": "global_percentile",
+      "percentile": 90,
+      "tp": 12,
+      "fp": 708,
+      "fn": 14,
+      "precision": 0.017,
+      "recall": 0.462
+    },
+    {
+      "strategy": "global_percentile",
+      "percentile": 95,
+      "tp": 10,
+      "fp": 350,
+      "fn": 16,
+      "precision": 0.028,
+      "recall": 0.385
+    },
+    {
+      "strategy": "global_percentile",
+      "percentile": 97,
+      "tp": 8,
+      "fp": 208,
+      "fn": 18,
+      "precision": 0.037,
+      "recall": 0.308
+    },
+    {
+      "strategy": "global_percentile",
+      "percentile": 98,
+      "tp": 6,
+      "fp": 138,
+      "fn": 20,
+      "precision": 0.042,
+      "recall": 0.231
+    },
+    {
+      "strategy": "global_percentile",
+      "percentile": 99,
+      "tp": 6,
+      "fp": 66,
+      "fn": 20,
+      "precision": 0.083,
+      "recall": 0.231
+    },
+    {
+      "strategy": "global_percentile",
+      "percentile": 99.5,
+      "tp": 4,
+      "fp": 32,
+      "fn": 22,
+      "precision": 0.111,
+      "recall": 0.154
+    },
+    {
+      "strategy": "global_percentile",
+      "percentile": 99.7,
+      "tp": 3,
+      "fp": 19,
+      "fn": 23,
+      "precision": 0.136,
+      "recall": 0.115
+    }
+  ],
+  "best_overall": {
+    "strategy": "per_equipment_mad",
+    "mad_multiplier": 1.5,
+    "tp": 16,
+    "fp": 1580,
+    "fn": 10,
+    "precision": 0.01,
+    "recall": 0.615
+  },
+  "zscore_baseline_for_comparison": {
+    "model": "z-score rule (backend/app/intelligence/anomaly.py, z_limit=2.5, rel_guard=0.15)",
+    "precision": 0.57,
+    "recall": 0.92,
+    "source": "data-pipeline/LIMITATIONS.md #7"
+  },
+  "verdict": "does_not_beat_baseline",
+  "recommendation": "Keep the z-score rule (app/intelligence/anomaly.py) in production. The autoencoder was rigorously evaluated against the same 26 ground-truth labels under two threshold strategies and does not match its precision/recall on this dataset \u2014 see 'why' below.",
+  "why_the_autoencoder_underperforms_here": "Anomalies are 0.36% of all equipment-months (26/7176) \u2014 extreme class imbalance for a reconstruction-error ranking approach with only 26 positive examples to separate from the tail of a noisy distribution. Anomalous months DO have ~4-5x higher mean reconstruction error than normal months (1.15 vs 0.29 in this run), so the signal is real, but the normal-month error distribution has a long enough tail (from ordinary month-to-month noise across 600 pooled series, only 12 samples each) that no single threshold cleanly separates the two without either missing most anomalies or flagging hundreds of normal months. The z-score rule wins here specifically because it exploits each equipment's OWN within-series statistics directly (leave-one-out z), rather than a shared cross-equipment reconstruction model \u2014 with only 12 monthly samples per series and one year of history, that turns out to be the more data-efficient approach for this dataset size. A conditional autoencoder would plausibly do better with multiple years of history per factory (giving it real seasonal structure to learn beyond what 12 samples can support) or a much larger factory count \u2014 neither exists yet.",
+  "architecture": {
+    "type": "conditional autoencoder",
+    "series_len": 12,
+    "latent_dim": 6,
+    "condition": "one-hot(sector) + one-hot(process_kind)",
+    "epochs": 400
+  },
+  "note": "Trained + evaluated on the 120-factory synthetic dataset. Does NOT validate real-world generalisation \u2014 no real Gujarat SME dataset exists to test against (data-pipeline/LIMITATIONS.md #1)."
+}

@@ -51,6 +51,12 @@ export interface Factory {
   totalEnergyMwhPerYear: number;
   totalWasteTpy: number;
   circularityRatio: number; // 0-1
+  /** Best single recommendation per process, summed — not fabricated, from the backend. */
+  avoidableCo2eTpy?: number;
+  /** Illustrative CCTS-indicative valuation of avoidableCo2eTpy — always is_placeholder. */
+  carbonCreditValueInrPerYear?: number;
+  carbonCreditIsPlaceholder?: boolean;
+  carbonCreditNote?: string;
   dataSource: "synthetic" | "self-reported" | "verified";
   nodes: ProcessNode[];
   lat: number;

@@ -1,0 +1,37 @@
+{
+  "_comment": "Recorded, checked-in baseline for scripts/validate_all.py to regression-test against. Recorded 2026-09-12 by actually running each harness (ml/eval_zscore_baseline.py, ml/benchmark_model.py, ml/symbiosis_model.py) \u2014 not copied from earlier session notes. That mattered: this run found the numbers had already quietly drifted from the figures documented in ml/LIMITATIONS.md (recorded when the anomaly-detector/benchmark-model fixes first landed, before later generator changes shifted the ground-truth data slightly) \u2014 z-score precision/recall moved from the documented 0.57/0.92 to 0.553/0.913, and the benchmark model's improvement moved from 36.9%/6.3% to 38.3%/12.9%. Both are still well within healthy ranges, but this drift going undetected until now is exactly why this file exists. If you regenerate the synthetic dataset or retrain a model, re-run scripts/validate_all.py --update-baseline to intentionally accept new numbers \u2014 never hand-edit this file to make a failing check pass.",
+  "recorded_at": "2026-09-12",
+  "zscore_anomaly_detector": {
+    "description": "backend/app/intelligence/anomaly.py \u2014 the anomaly detector actually in production.",
+    "precision": 0.553,
+    "recall": 0.913,
+    "min_precision": 0.45,
+    "min_recall": 0.8,
+    "note": "Tolerance band, not an exact-match requirement: small ground-truth-label drift from re-running the synthetic generator is expected and fine; a drop below these floors means a real regression (e.g. someone loosened the thresholds) and should block a ship."
+  },
+  "benchmark_model": {
+    "description": "ml/benchmark_model.py (LightGBM) vs. the flat sourced benchmark.",
+    "random_kfold_improvement_pct": 38.3,
+    "leave_one_cluster_out_improvement_pct": 12.9,
+    "min_random_kfold_improvement_pct": 20.0,
+    "min_leave_one_cluster_out_improvement_pct": 0.0,
+    "note": "min_leave_one_cluster_out_improvement_pct=0.0 means: must not be WORSE than the flat benchmark for a brand-new cluster (that was the original bug this model found and fixed at the data-generator level \u2014 see data-pipeline/LIMITATIONS.md #9). Going negative again would mean that fix broke."
+  },
+  "symbiosis_matcher": {
+    "description": "ml/symbiosis_model.py (MiniLM + FAISS).",
+    "n_matches": 140,
+    "min_n_matches": 80,
+    "max_n_matches": 250,
+    "min_semantic_similarity_threshold": 0.65,
+    "note": "min_semantic_similarity_threshold must stay >= the value that excluded the textile_sludge/cotton_waste false-positive match found during Phase 3c (see ml/LIMITATIONS.md) \u2014 lowering it silently would reintroduce that exact bug."
+  },
+  "anomaly_autoencoder": {
+    "description": "ml/anomaly_model.py (PyTorch) \u2014 built, evaluated, intentionally NOT in production.",
+    "expected_verdict": "does_not_beat_baseline",
+    "note": "This is a sanity check, not a quality bar: if a future retrain suddenly reports 'beats_baseline', that's worth a deliberate human decision to promote it to production \u2014 not something that should happen silently via an automated pipeline. Flagged, not failed."
+  },
+  "data_pipeline": {
+    "expected_factory_count": 120,
+    "expected_cluster_count": 9
+  }
+}

@@ -12,11 +12,16 @@ export default function FactoryPage() {
     <main className="flex flex-1 flex-col gap-3 overflow-hidden p-4">
       <div className="flex items-start justify-between gap-3">
         <KpiBar factory={factory} />
-        {factory.dataSource !== "synthetic" && (
-          <Link to={`/intake/${factory.id}`} className="shrink-0 rounded-lg border border-[color:var(--color-accent)]/60 bg-[color:var(--color-accent)]/10 px-3 py-2 text-xs font-semibold text-[color:var(--color-accent)] hover:bg-[color:var(--color-accent)]/20">
-            Edit layout & components
+        <div className="flex shrink-0 gap-2">
+          <Link to={`/report/${factory.id}`} className="rounded-lg border border-[color:var(--color-border)] px-3 py-2 text-xs font-semibold hover:bg-[color:var(--color-panel-2)]">
+            Decarbonization report
           </Link>
-        )}
+          {factory.dataSource !== "synthetic" && (
+            <Link to={`/intake/${factory.id}`} className="rounded-lg border border-[color:var(--color-accent)]/60 bg-[color:var(--color-accent)]/10 px-3 py-2 text-xs font-semibold text-[color:var(--color-accent)] hover:bg-[color:var(--color-accent)]/20">
+              Edit layout & components
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="grid flex-1 grid-cols-1 gap-3 overflow-hidden lg:grid-cols-[260px_1fr_360px]">

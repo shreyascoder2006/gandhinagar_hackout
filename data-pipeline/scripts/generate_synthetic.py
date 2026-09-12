@@ -122,6 +122,22 @@ def load_benchmarks():
     return by_sector
 
 
+def load_waste_stream_profiles():
+    rows = load_csv("waste_stream_profiles.csv")
+    by_sector = {}
+    for r in rows:
+        by_sector.setdefault(r["sector"], []).append({
+            "role": r["role"],
+            "tag": r["tag"],
+            "label": r["label"],
+            "form": r["form"],
+            "share_of_basis": float(r["share_of_basis"]),
+            "cost_inr_per_t": float(r["cost_inr_per_t"]),
+            "basis": r["basis"],
+        })
+    return by_sector
+
+
 def load_emission_factors():
     rows = load_csv("emission_factors.csv")
     out = {}
@@ -141,7 +157,32 @@ def jitter_latlon(rng, lat, lon, max_km=12.0):
     return round(lat + dlat, 4), round(lon + dlon, 4)
 
 
-def build_factory(rng, cluster, sector, seq, processes, ef, waste_ratio_row):
+def build_waste_stream_tags(rng, sector, profiles_by_sector, total_waste_tpy, annual_output_t):
+    """Tagged waste streams (emit) and accepted inputs (accept) for one
+    factory, sized off its own real computed totals — not fabricated
+    quantities. See data-pipeline/clean/waste_stream_profiles.csv for the
+    per-sector tag vocabulary and sourcing notes."""
+    emit, accept = [], []
+    for p in profiles_by_sector.get(sector, []):
+        noise = rng.uniform(0.85, 1.15)
+        if p["role"] == "emit":
+            basis_value = total_waste_tpy if p["basis"] == "total_waste_tpy" else annual_output_t
+            tpy = round(p["share_of_basis"] * basis_value * noise, 1) if p["share_of_basis"] > 0 else 0
+            emit.append({
+                "tag": p["tag"], "label": p["label"], "form": p["form"],
+                "tpy": tpy, "disposal_cost_inr_per_t": p["cost_inr_per_t"],
+            })
+        else:
+            basis_value = total_waste_tpy if p["basis"] == "total_waste_tpy" else annual_output_t
+            max_tpy = round(p["share_of_basis"] * basis_value * noise, 1)
+            accept.append({
+                "tag": p["tag"], "label": p["label"],
+                "max_tpy": max_tpy, "virgin_cost_inr_per_t": p["cost_inr_per_t"],
+            })
+    return emit, accept
+
+
+def build_factory(rng, cluster, sector, seq, processes, ef, waste_ratio_row, waste_stream_profiles):
     output_lo, output_hi = SECTOR_OUTPUT_RANGE_T_PER_YEAR[sector]
     annual_output_t = rng.uniform(output_lo, output_hi)
     monthly_base_output = annual_output_t / 12.0
@@ -154,7 +195,24 @@ def build_factory(rng, cluster, sector, seq, processes, ef, waste_ratio_row):
     # compares to the sector benchmark (0.8 = runs 20% better than benchmark,
     # 1.4 = runs 40% worse). This is what later lets benchmark-deviation and
     # hotspot ranking actually differentiate factories.
-    factory_performance_ratio = rng.uniform(0.80, 1.45)
+    #
+    # Includes a deliberate, documented economies-of-scale effect: larger
+    # factories within a sector's output range tend to run closer to (or
+    # better than) benchmark, smaller ones tend to run worse — a real,
+    # well-known industrial pattern (better instrumentation, more consistent
+    # throughput, amortised process-control investment at scale), not an
+    # invented one, though the specific magnitude here is a documented
+    # modelling choice, not a cited coefficient. This was ADDED after Phase 3a
+    # (ml/benchmark_model.py) found the original pure-noise ratio made the
+    # flat benchmark mathematically optimal — no covariate-dependent signal
+    # existed for any model to learn, so a LightGBM predictor scored worse
+    # than just using the benchmark number (see ml/artifacts/benchmark_metrics.json
+    # history / data-pipeline/LIMITATIONS.md #9). Fixed here, at the source,
+    # rather than papering over it in the model.
+    output_percentile = (annual_output_t - output_lo) / (output_hi - output_lo) if output_hi > output_lo else 0.5
+    scale_effect = 1.18 - 0.32 * output_percentile  # 1.18x at the small end, 0.86x at the large end
+    base_noise = rng.uniform(0.85, 1.25)
+    factory_performance_ratio = scale_effect * base_noise
 
     # Dampen and individualise the seasonal curve per factory. Applying the
     # exact same seasonal shape to all 120 factories turned out to be a real
@@ -217,6 +275,11 @@ def build_factory(rng, cluster, sector, seq, processes, ef, waste_ratio_row):
             "general_process_waste_t": round(out_t * general_pct * rng.uniform(0.85, 1.15), 2),
         })
 
+    total_waste_tpy = sum(m["hazardous_waste_t"] + m["general_process_waste_t"] for m in monthly_waste)
+    waste_streams, accepted_inputs = build_waste_stream_tags(
+        rng, sector, waste_stream_profiles, total_waste_tpy, annual_output_t
+    )
+
     return {
         "id": factory_id,
         "name": name,
@@ -230,6 +293,8 @@ def build_factory(rng, cluster, sector, seq, processes, ef, waste_ratio_row):
         "monthly_output_tonnes": monthly_output,
         "processes": process_records,
         "monthly_waste": monthly_waste,
+        "waste_streams": waste_streams,
+        "accepted_inputs": accepted_inputs,
         "consent_to_share": True,
     }
 
@@ -268,6 +333,7 @@ def main():
     benchmarks = load_benchmarks()
     ef = load_emission_factors()
     waste_ratios = {r["sector"]: r for r in load_csv("waste_ratios.csv")}
+    waste_stream_profiles = load_waste_stream_profiles()
 
     factories = []
     for cluster_id, sector_counts in CLUSTER_PLAN.items():
@@ -276,7 +342,7 @@ def main():
             processes = benchmarks[sector]
             for seq in range(1, count + 1):
                 factories.append(
-                    build_factory(rng, cluster, sector, seq, processes, ef, waste_ratios[sector])
+                    build_factory(rng, cluster, sector, seq, processes, ef, waste_ratios[sector], waste_stream_profiles)
                 )
 
     assert len(factories) == 120, f"expected 120 factories, got {len(factories)}"

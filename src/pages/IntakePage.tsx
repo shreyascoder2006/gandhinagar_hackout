@@ -5,6 +5,9 @@ import { clusters } from "../data/clusters";
 import { sectorTemplates } from "../data/factories";
 import { emissionFactors } from "../data/emissionFactors";
 import { buildFactory, parseCsv, CSV_TEMPLATE, type Activity, type IntakeProfile, type Issue } from "../lib/engine";
+import { buildOnboardPayload } from "../lib/onboardingAdapter";
+import { api } from "../lib/api";
+import { useRoleStore } from "../store/useRoleStore";
 import { severityColor, severityLabel } from "../lib/severity";
 
 type Tab = "form" | "csv";
@@ -23,13 +26,16 @@ const EXAMPLE_ROWS: Row[] = [
 ];
 
 export default function IntakePage() {
-  const addFactory = useFactoryStore((s) => s.addFactory);
   const updateFactory = useFactoryStore((s) => s.updateFactory);
+  const refreshFactoryFromApi = useFactoryStore((s) => s.refreshFactoryFromApi);
   const factories = useFactoryStore((s) => s.factories);
+  const organizationId = useRoleStore((s) => s.organizationId);
   const navigate = useNavigate();
   const { factoryId } = useParams();
   const editing = factories.find((f) => f.id === factoryId && f.dataSource !== "synthetic");
   const [tab, setTab] = useState<Tab>("form");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [profile, setProfile] = useState<IntakeProfile>({ name: "", clusterId: "morbi", sector: "Ceramics", subSector: "", outputTonnesPerMonth: 0, wasteTpy: 0, recoveredTpy: 0, consentToShare: true });
   const [rows, setRows] = useState<Row[]>([{ process: "", fuel: "grid_electricity", quantity: "", unit: "kWh" }]);
   const [csvText, setCsvText] = useState("");
@@ -93,12 +99,34 @@ export default function IntakePage() {
     setCsvIssues([{ row: 0, level: "warn", message: `Parsed ${acts.length} rows · columns detected: ${header.join(", ")}` }]);
   };
 
-  const submit = () => {
+  const submit = async () => {
     if (!preview || blocking) return;
-    const { factory } = buildFactory(profile, activities, editing?.id, layout);
-    if (editing) updateFactory(factory);
-    else addFactory(factory);
-    navigate("/");
+
+    if (editing) {
+      // Editing an already-onboarded factory: no PATCH /api/factories/{id}
+      // endpoint exists yet, so this path stays local-only for now (see
+      // useFactoryStore.ts comment on updateFactory).
+      const { factory } = buildFactory(profile, activities, editing.id, layout);
+      updateFactory(factory);
+      navigate("/");
+      return;
+    }
+
+    // Creating a new factory: real backend onboarding — same engine every
+    // seeded factory runs through, not a separate local-only calculation.
+    setSubmitError(null);
+    setSubmitting(true);
+    try {
+      const payload = buildOnboardPayload(profile, activities);
+      const created = await api.onboardFactory(payload);
+      await refreshFactoryFromApi(created.id);
+      api.trackUsage("factory_onboarded", organizationId, created.id).catch(() => {});
+      navigate("/");
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const issues = [...csvIssues, ...(preview?.issues ?? [])];
@@ -235,8 +263,13 @@ export default function IntakePage() {
               <div className="mt-3 text-[10px] text-[color:var(--color-muted)]">
                 Method: quantity × emission factor (CEA / IPCC / MoEFCC, see Methodology) → kgCO₂e per tonne of output → vs ASI/BEE sub-sector benchmark. Self-reported data: high confidence (85–95%).
               </div>
-              <button onClick={submit} disabled={blocking} className="mt-4 rounded-lg bg-[color:var(--color-accent)] px-4 py-2 text-sm font-semibold text-black disabled:cursor-not-allowed disabled:opacity-40">
-                {editing ? "Save changes & refresh diagnosis" : "Create factory & open diagnosis"}
+              {submitError && (
+                <p className="mt-2 text-[11px] text-[color:var(--color-crit)]">
+                  Could not save: {submitError}. Is the backend running? (see backend/README.md)
+                </p>
+              )}
+              <button onClick={submit} disabled={blocking || submitting} className="mt-4 rounded-lg bg-[color:var(--color-accent)] px-4 py-2 text-sm font-semibold text-black disabled:cursor-not-allowed disabled:opacity-40">
+                {submitting ? "Saving…" : editing ? "Save changes & refresh diagnosis" : "Create factory & open diagnosis"}
               </button>
             </>
           )}

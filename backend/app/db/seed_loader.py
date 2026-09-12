@@ -56,6 +56,19 @@ def _seed_catalogs(session: Session) -> None:
             id=c["id"], name=c["name"], district=c["district"], lat=c["lat"], lon=c["lon"],
             dominant_sectors=";".join(c["dominantSectors"]), source=c["source"], confidence=c["confidence"],
         ))
+    for v in seed_data.vendor_directory():
+        session.add(db.VendorContact(
+            category=v["category"], name=v["name"], contact_email=v["contact_email"],
+            phone=v["phone"], region=v["region"], notes=v["notes"],
+        ))
+    # One demo consultant organization so Portfolio/white-labeling has
+    # something real to group factories under out of the box — not required,
+    # any factory can also be created unassigned or a new org created via
+    # POST /api/organizations.
+    session.add(db.Organization(
+        id="demo-consultancy", name="Gujarat Decarb Advisors (demo)", tier="free",
+        brand_color="#3ea6ff", logo_text="GDA",
+    ))
     session.commit()
 
 
@@ -74,7 +87,7 @@ def _seed_factories(session: Session) -> dict:
     """Returns a summary dict for the final report."""
     factories_raw = _load_synthetic_factories()
     stats = {"factories": 0, "equipment": 0, "energy_records": 0, "emission_records": 0,
-             "anomalies": 0, "recommendations": 0}
+             "anomalies": 0, "recommendations": 0, "waste_streams": 0, "accepted_inputs": 0}
 
     for fac_raw in factories_raw:
         annual_output_t = sum(fac_raw["monthly_output_tonnes"])
@@ -93,6 +106,20 @@ def _seed_factories(session: Session) -> dict:
                 hazardous_waste_t=waste_rec["hazardous_waste_t"],
                 general_process_waste_t=waste_rec["general_process_waste_t"],
             ))
+
+        for stream in fac_raw.get("waste_streams", []):
+            session.add(db.WasteStream(
+                factory_id=factory.id, tag=stream["tag"], label=stream["label"],
+                form=stream["form"], tpy=stream["tpy"],
+                disposal_cost_inr_per_t=stream["disposal_cost_inr_per_t"],
+            ))
+            stats["waste_streams"] += 1
+        for inp in fac_raw.get("accepted_inputs", []):
+            session.add(db.AcceptedInput(
+                factory_id=factory.id, tag=inp["tag"], label=inp["label"],
+                max_tpy=inp["max_tpy"], virgin_cost_inr_per_t=inp["virgin_cost_inr_per_t"],
+            ))
+            stats["accepted_inputs"] += 1
 
         equipment_rows: list[db.Equipment] = []
         for proc in fac_raw["processes"]:

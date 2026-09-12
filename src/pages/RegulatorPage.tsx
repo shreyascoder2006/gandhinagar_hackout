@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import ClusterMap from "../components/map/ClusterMap";
+import ScaleImpactPanel from "../components/dashboard/ScaleImpactPanel";
 import { allFactories } from "../data/factories";
 import { rollup, MIN_CELL } from "../lib/rollup";
 import { formatInr } from "../lib/severity";
@@ -26,7 +27,8 @@ function Kpi({ label, value, sub }: { label: string; value: string; sub?: string
 
 export default function RegulatorPage() {
   const factories = useFactoryStore((s) => s.factories);
-  const state = useMemo(() => rollup(factories), [factories]);
+  const symbiosisMatches = useFactoryStore((s) => s.symbiosisMatches);
+  const state = useMemo(() => rollup(factories, symbiosisMatches), [factories, symbiosisMatches]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedFactoryId, setSelectedFactoryId] = useState<string | null>(null);
   const sel = state.clusters.find((c) => c.cluster.id === selectedId) ?? null;
@@ -51,6 +53,8 @@ export default function RegulatorPage() {
           Aggregated & anonymised · cells with &lt; {MIN_CELL} units suppressed · synthetic demo cohort
         </span>
       </div>
+
+      <ScaleImpactPanel />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
         <Kpi label="Units in cohort" value={String(state.factories)} sub={`${state.clusters.length} clusters`} />

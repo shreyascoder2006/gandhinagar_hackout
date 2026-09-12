@@ -4,16 +4,16 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from .routers import catalog, clusters, factories, onboarding
+from .routers import business, catalog, clusters, explainer, factories, onboarding
 
 app = FastAPI(
     title="Induscope API",
-    description="Circular Carbon Intelligence backend — Phase 2/4 of the build plan. "
-                "Every computed field traces to a real function call in app/engine or "
-                "app/intelligence over real-or-calibrated data (data-pipeline/). "
-                "Symbiosis matching and LLM explanations are Phase 3 (not yet built) — "
-                "endpoints for them return empty/fallback rather than fabricated output.",
-    version="0.2.0",
+    description="Circular Carbon Intelligence backend. Every computed field traces to a "
+                "real function call in app/engine, app/intelligence, or ml/ over "
+                "real-or-calibrated data (data-pipeline/). Symbiosis matching (ml/symbiosis_model.py) "
+                "and the tool-calling explainer (ml/explainer.py, Ollama llama3.1:8b + "
+                "deterministic fallback) are live as of Phase 3c/3d.",
+    version="0.3.0",
 )
 
 app.add_middleware(
@@ -33,6 +33,9 @@ app.include_router(clusters.router)
 app.include_router(factories.router)
 app.include_router(catalog.router)
 app.include_router(onboarding.router)
+app.include_router(explainer.router)
+app.include_router(explainer.global_router)
+app.include_router(business.router)
 
 
 @app.get("/api/health")

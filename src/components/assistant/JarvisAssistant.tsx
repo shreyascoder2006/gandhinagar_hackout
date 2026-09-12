@@ -1,32 +1,37 @@
 import { useRef, useState } from "react";
 import { useFactoryStore } from "../../store/useFactoryStore";
+import { useChatStore } from "../../store/useChatStore";
 import { useTranslation } from "../../store/useLanguageStore";
+import { useRoleStore } from "../../store/useRoleStore";
+import { api } from "../../lib/api";
 
-type Message = { role: "jarvis" | "user"; text: string };
+// Real tool-calling explainer (ml/explainer.py, Ollama llama3.1:8b + a
+// deterministic fallback), not the keyword-regex bot this used to be. Every
+// number it states traces to a real database query — see backend/app/routers/
+// explainer.py and ml/explainer.py's "verified_data" guardrail for why the
+// prose alone isn't trusted for numbers, and why a bad/empty tool result
+// gets an honest "I don't have that" instead of a guess.
+
 type Recognition = { continuous: boolean; interimResults: boolean; lang: string; start: () => void; stop: () => void; onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; onerror: (() => void) | null };
 type RecognitionCtor = new () => Recognition;
 
-function response(query: string, f: ReturnType<typeof useFactoryStore.getState>["baseline"]) {
-  const q = query.toLowerCase();
-  const hotspots = f.nodes.filter((n) => n.severity === "crit");
-  if (/hello|hi\b|help|what can you do|નમસ્તે|नमस्ते/.test(q)) return `I am JARVIS, your Carbon Intelligence guide. Ask about ${f.name}, process hotspots, the regulator scene, CO₂ Exchange, or how to update factory data.`;
-  if (/hotspot|problem|priority|emission|હોટસ્પોટ|हॉटस्पॉट/.test(q)) return `${f.name} has ${hotspots.length} hotspot process${hotspots.length === 1 ? "" : "es"}. ${hotspots.slice(0, 2).map((n) => `${n.label}: ${n.co2eTpy.toLocaleString("en-IN")} tCO₂e per year`).join("; ") || "No critical processes are currently flagged"}. Open Diagnose and click a machine for its root cause and interventions.`;
-  if (/co2|carbon|emission total|કાર્બન|कार्बन/.test(q)) return `${f.name}'s current modelled footprint is ${f.totalCo2eTpy.toLocaleString("en-IN")} tCO₂e per year. CO₂ Exchange estimates capture-ready surplus from combustion process emissions; it is a screening tool, not a verified inventory.`;
-  if (/exchange|market|deal|borrow|lend|supplier|એક્સચેન્જ|एक्सचेंज/.test(q)) return `In CO₂ Exchange, select a supplier and then a network string. The full deal workspace lets you accept a non-binding proposal, set delivery date, cadence, truck count and CO₂ price, then see material, capture, freight and delivered-cost estimates update instantly.`;
-  if (/regulator|morbi|cluster|map|નિયમનકાર|नियामक/.test(q)) return `The Regulator view aggregates factories by industrial cluster. Select Morbi or another cluster to zoom in; factory buildings rise from the map and their cards show each unit's contribution. Private participants remain anonymised.`;
-  if (/edit|intake|layout|component|data|લેઆઉટ|ડેટા|डेटा/.test(q)) return `For a self-reported factory, open Diagnose and choose “Edit layout & components.” You can revise process energy data, output and waste figures, then reposition 3D process components. Saving refreshes diagnosis, the twin and regulator rollups.`;
-  if (/circular|waste|reuse|કચરો|कचरा/.test(q)) return `${f.name}'s circularity ratio is ${Math.round(f.circularityRatio * 100)}%. The platform uses waste-to-input matches to identify nearby industrial symbiosis opportunities; those matches need commercial and regulatory validation.`;
-  return `I can help with this prototype’s live data and workflows. Try “What are the hotspots?”, “How does CO₂ Exchange work?”, “How do I edit this factory?”, or “Explain the regulator map.”`;
-}
+const SAMPLE_PROMPTS = [
+  "Which factory is performing the best?",
+  "What problem does this factory have?",
+  "What's the best strategy under a 10 lakh budget?",
+];
 
 export default function JarvisAssistant() {
   const factory = useFactoryStore((s) => s.baseline);
   const { lang, t } = useTranslation();
+  const organizationId = useRoleStore((s) => s.organizationId);
   const [open, setOpen] = useState(false);
   const [listening, setListening] = useState(false);
-  const [voice, setVoice] = useState(true);
+  const [voice, setVoice] = useState(false);
   const [draft, setDraft] = useState("");
-  const [messages, setMessages] = useState<Message[]>([{ role: "jarvis", text: t("jarvisGreeting") }]);
+  const [thinking, setThinking] = useState(false);
+  const messages = useChatStore((s) => s.messages);
+  const setMessages = useChatStore((s) => s.setMessages);
   const recognition = useRef<Recognition | null>(null);
 
   const speechLang = lang === "gu" ? "gu-IN" : lang === "hi" ? "hi-IN" : "en-IN";
@@ -40,19 +45,45 @@ export default function JarvisAssistant() {
     }
   };
 
-  const ask = (query: string) => {
+  const ask = async (query: string) => {
     const clean = query.trim();
-    if (!clean) return;
-    const answer = response(clean, factory);
-    setMessages((all) => [...all, { role: "user", text: clean }, { role: "jarvis", text: answer }]);
+    if (!clean || thinking) return;
     setDraft("");
-    speak(answer);
+    setThinking(true);
+    api.trackUsage("chat_question", organizationId).catch(() => {});
+
+    let targetIndex = -1;
+    setMessages((all) => {
+      targetIndex = all.length + 1; // the assistant placeholder, right after the user message
+      return [...all, { role: "user", text: clean }, { role: "assistant", text: "" }];
+    });
+
+    let full = "";
+    try {
+      await api.askStream(clean, factory.id || null, (event) => {
+        if (event.type === "token") {
+          full += event.text;
+          const snapshot = full;
+          setMessages((all) => all.map((m, i) => (i === targetIndex ? { ...m, text: snapshot } : m)));
+        } else {
+          setMessages((all) => all.map((m, i) => (i === targetIndex
+            ? { ...m, text: event.answer, verifiedData: event.verified_data, source: event.source }
+            : m)));
+          speak(event.answer);
+        }
+      });
+    } catch (err) {
+      const text = `Could not reach the explainer API — is the backend running? (${err instanceof Error ? err.message : String(err)})`;
+      setMessages((all) => all.map((m, i) => (i === targetIndex ? { ...m, text } : m)));
+    } finally {
+      setThinking(false);
+    }
   };
 
   const startVoice = () => {
     const ctor = (window as Window & { SpeechRecognition?: RecognitionCtor; webkitSpeechRecognition?: RecognitionCtor }).SpeechRecognition ?? (window as Window & { webkitSpeechRecognition?: RecognitionCtor }).webkitSpeechRecognition;
     if (!ctor) {
-      setMessages((all) => [...all, { role: "jarvis", text: "Voice input is not available in this browser. You can still type any question below." }]);
+      setMessages((all) => [...all, { role: "assistant", text: "Voice input is not available in this browser. You can still type any question below." }]);
       return;
     }
     const rec = new ctor();
@@ -71,18 +102,16 @@ export default function JarvisAssistant() {
     rec.start();
   };
 
-  const samplePrompts = [t("jarvisPrompt1"), t("jarvisPrompt2"), t("jarvisPrompt3")];
-
   return (
     <div className="fixed bottom-4 right-4 z-[1000]">
       {open && (
-        <section className="jarvis-panel mb-3 flex h-[470px] w-[350px] flex-col overflow-hidden rounded-2xl border border-[#3ea6ff]/45 bg-[#0d1420]/95 shadow-2xl backdrop-blur-xl">
+        <section className="jarvis-panel mb-3 flex h-[520px] w-[380px] flex-col overflow-hidden rounded-2xl border border-[#3ea6ff]/45 bg-[#0d1420]/95 shadow-2xl backdrop-blur-xl">
           <div className="flex items-center justify-between border-b border-[color:var(--color-border)] bg-[#3ea6ff]/10 px-4 py-3">
             <div className="flex items-center gap-2">
               <span className="jarvis-orb" />
               <div>
                 <div className="text-sm font-semibold">{t("jarvisTitle")}</div>
-                <div className="text-[10px] text-[#92caff]">{t("jarvisSub")}</div>
+                <div className="text-[10px] text-[#92caff]">Real tool-calling AI · {factory.name || "no factory selected"}</div>
               </div>
             </div>
             <div className="flex gap-1">
@@ -93,15 +122,32 @@ export default function JarvisAssistant() {
             </div>
           </div>
           <div className="flex-1 space-y-3 overflow-y-auto p-3">
-            {messages.map((m, i) => (
-              <div key={i} className={`max-w-[90%] rounded-xl px-3 py-2 text-[12px] leading-relaxed ${m.role === "jarvis" ? "bg-[#172335] text-[color:var(--color-text)]" : "ml-auto bg-[#3ea6ff] text-[#07101c]"}`}>
-                {m.text}
-              </div>
-            ))}
+            {messages.map((m, i) => {
+              const isLive = thinking && i === messages.length - 1 && m.role === "assistant";
+              return (
+                <div key={i} className={`max-w-[92%] rounded-xl px-3 py-2 text-[12px] leading-relaxed ${m.role === "assistant" ? "bg-[#172335] text-[color:var(--color-text)]" : "ml-auto bg-[#3ea6ff] text-[#07101c]"}`}>
+                  <div>
+                    {m.text || (isLive ? "Calling the database…" : "")}
+                    {isLive && m.text && <span className="jarvis-cursor" />}
+                  </div>
+                  {m.verifiedData != null && (
+                    <details className="mt-1.5">
+                      <summary className="cursor-pointer text-[10px] text-[#8fb8e0]">See the real numbers</summary>
+                      <pre className="mt-1 max-h-40 overflow-auto rounded bg-black/30 p-1.5 text-[9.5px] leading-snug text-[#b9dcff]">
+                        {JSON.stringify(m.verifiedData, null, 1)}
+                      </pre>
+                    </details>
+                  )}
+                  {m.source && (
+                    <div className="mt-1 text-[9px] uppercase tracking-wide text-[#5f7c99]">{m.source}</div>
+                  )}
+                </div>
+              );
+            })}
           </div>
           <div className="border-t border-[color:var(--color-border)] p-3">
             <div className="mb-2 flex flex-wrap gap-1">
-              {samplePrompts.map((prompt) => (
+              {SAMPLE_PROMPTS.map((prompt) => (
                 <button key={prompt} onClick={() => ask(prompt)} className="rounded-full border border-[color:var(--color-border)] px-2 py-1 text-[10px] text-[color:var(--color-muted)] hover:border-[#3ea6ff]/60 hover:text-[#b9dcff]">
                   {prompt}
                 </button>
@@ -112,16 +158,18 @@ export default function JarvisAssistant() {
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder={t("jarvisAskPlaceholder")}
-                className="min-w-0 flex-1 rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel-2)] px-3 py-2 text-xs outline-none focus:border-[#3ea6ff]"
+                disabled={thinking}
+                className="min-w-0 flex-1 rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel-2)] px-3 py-2 text-xs outline-none focus:border-[#3ea6ff] disabled:opacity-50"
               />
               <button
                 type="button"
                 onClick={startVoice}
+                disabled={thinking}
                 className={`rounded-lg border px-2.5 text-xs ${listening ? "border-[color:var(--color-crit)] bg-[color:var(--color-crit)]/15 text-[color:var(--color-crit)]" : "border-[color:var(--color-border)] text-[#9fd3ff]"}`}
               >
                 {listening ? "●" : "◉"}
               </button>
-              <button className="rounded-lg bg-[#3ea6ff] px-3 text-xs font-bold text-[#07101c]">↑</button>
+              <button disabled={thinking} className="rounded-lg bg-[#3ea6ff] px-3 text-xs font-bold text-[#07101c] disabled:opacity-50">↑</button>
             </form>
           </div>
         </section>

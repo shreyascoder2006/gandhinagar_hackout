@@ -8,8 +8,13 @@
 // implications, so it's the one thing kept as static frontend layout data
 // (reused from the original sectorTemplates) rather than sent by the API.
 import type { Factory, ProcessNode, Intervention, Confidence } from "../types";
-import type { ApiCluster, ApiFactory, ApiEquipment, ApiRecommendation } from "./api";
+import type { ApiCluster, ApiFactory, ApiEquipment, ApiRecommendation, ApiSymbiosisMatch } from "./api";
+import type { SymbiosisMatch } from "./symbiosis";
 import { sectorTemplates } from "../data/factories";
+
+function humanizeTag(tag: string): string {
+  return tag.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 const FALLBACK_LAYOUT: { position: [number, number, number]; scale: [number, number, number] } = {
   position: [0, 0, 0],
@@ -86,6 +91,10 @@ export function adaptFactory(f: ApiFactory, clusterNameById: Record<string, stri
     // not built) — 0 is the honest value, not a placeholder guess. See
     // backend/app/routers/factories.py _to_full_out().
     circularityRatio: f.circularity_ratio,
+    avoidableCo2eTpy: f.avoidable_co2e_tpy,
+    carbonCreditValueInrPerYear: f.carbon_credit_value_inr_per_year,
+    carbonCreditIsPlaceholder: f.carbon_credit_is_placeholder,
+    carbonCreditNote: f.carbon_credit_note,
     dataSource: DATA_SOURCE_MAP[f.data_source] ?? "synthetic",
     nodes: f.equipment.map((e) => adaptEquipment(f.sector, e)),
     lat: f.lat,
@@ -102,4 +111,31 @@ export function adaptFactory(f: ApiFactory, clusterNameById: Record<string, stri
 
 export function adaptClusterNameMap(clusters: ApiCluster[]): Record<string, string> {
   return Object.fromEntries(clusters.map((c) => [c.id, c.name]));
+}
+
+/** Maps a real ml/symbiosis_model.py match (MiniLM semantic + quantity fit +
+ * proximity, see backend/app/db/models.py SymbiosisMatch) onto the existing
+ * frontend SymbiosisMatch shape, so SymbiosisPanel/RegulatorPage keep working
+ * unchanged. `consentById` re-applies the anonymisation the API itself
+ * doesn't gate on (it always returns real names; the frontend decides what
+ * to display, same as it always has for locally-added factories). */
+export function adaptSymbiosisMatch(m: ApiSymbiosisMatch, consentById: Record<string, boolean>): SymbiosisMatch {
+  const sourceConsent = consentById[m.provider_factory_id] ?? false;
+  const targetConsent = consentById[m.recipient_factory_id] ?? false;
+  return {
+    id: `${m.id}`,
+    sourceId: m.provider_factory_id,
+    targetId: m.recipient_factory_id,
+    sourceName: sourceConsent ? (m.provider_factory_name ?? m.provider_factory_id) : "Anonymised unit (no consent)",
+    targetName: targetConsent ? (m.recipient_factory_name ?? m.recipient_factory_id) : "Anonymised unit (no consent)",
+    tag: m.waste_tag,
+    label: `${humanizeTag(m.waste_tag)} → ${humanizeTag(m.waste_tag)}`,
+    distanceKm: m.distance_km,
+    tonnesMatched: m.quantity_tpy,
+    co2AvoidedTpy: m.co2_avoided_tpy,
+    sourceSavingInr: m.provider_saving_inr,
+    targetSavingInr: m.recipient_saving_inr,
+    score: Math.round(m.overall_score * 100),
+    confidence: "low",
+  };
 }

@@ -24,6 +24,45 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export type AskStreamEvent =
+  | { type: "token"; text: string }
+  | { type: "final"; answer: string; verified_data: Record<string, unknown> | null; source: string };
+
+/** Reads backend/app/routers/explainer.py's POST /api/ask/stream (Server-Sent
+ * Events, one `data: {json}\n\n` frame per event). Native fetch + a stream
+ * reader rather than EventSource, since EventSource can't send a POST body
+ * (the question). Every "token" event is a real piece of the LLM's answer as
+ * Ollama generates it — see ml/explainer.py's ask_stream() docstring for why
+ * this is safe to show live (the empty-result safety check runs before
+ * generation starts, so nothing streamed here is ever a fabrication that
+ * needs retracting mid-stream). */
+async function postSse(path: string, body: unknown, onEvent: (event: AskStreamEvent) => void): Promise<void> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok || !res.body) {
+    const detail = await res.json().catch(() => null);
+    throw new Error(`POST ${path} failed: ${res.status} ${detail?.detail ?? res.statusText}`);
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const frames = buffer.split("\n\n");
+    buffer = frames.pop() ?? ""; // last piece may be incomplete — keep for next chunk
+    for (const frame of frames) {
+      const line = frame.split("\n").find((l) => l.startsWith("data: "));
+      if (!line) continue;
+      onEvent(JSON.parse(line.slice("data: ".length)) as AskStreamEvent);
+    }
+  }
+}
+
 export interface ApiCluster {
   id: string;
   name: string;
@@ -85,6 +124,10 @@ export interface ApiFactory {
   total_energy_mwh_per_year: number;
   total_waste_tpy: number;
   circularity_ratio: number;
+  avoidable_co2e_tpy: number;
+  carbon_credit_value_inr_per_year: number;
+  carbon_credit_is_placeholder: boolean;
+  carbon_credit_note: string;
   equipment: ApiEquipment[];
 }
 
@@ -97,10 +140,165 @@ export interface ApiAnomaly {
   status: string;
 }
 
+export interface ApiScaleProjection {
+  factory_count: number;
+  projected_total_co2e_tpy: number;
+  projected_avoidable_co2e_tpy: number;
+  projected_carbon_credit_value_inr: number;
+  sample_factory_count: number;
+  sample_avg_co2e_tpy: number;
+  sample_avg_avoidable_co2e_tpy: number;
+  methodology: string;
+}
+
+export interface ApiAskResult {
+  answer: string;
+  verified_data: Record<string, unknown> | null;
+  source: string;
+}
+
+export interface ApiSymbiosisMatch {
+  id: number;
+  provider_factory_id: string;
+  provider_factory_name: string | null;
+  recipient_factory_id: string;
+  recipient_factory_name: string | null;
+  waste_tag: string;
+  quantity_tpy: number;
+  distance_km: number;
+  semantic_score: number;
+  quantity_fit_score: number;
+  proximity_score: number;
+  overall_score: number;
+  co2_avoided_tpy: number;
+  provider_saving_inr: number;
+  recipient_saving_inr: number;
+  is_placeholder: boolean;
+}
+
+async function patchJson<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => null);
+    throw new Error(`PATCH ${path} failed: ${res.status} ${detail?.detail ?? res.statusText}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+// --- Business-feature layer types (organizations, usage, consent, vendors,
+// BRSR export, public API keys) — see backend/app/routers/business.py -------
+
+export interface ApiOrganization {
+  id: string;
+  name: string;
+  tier: "free" | "pro";
+  brand_color: string;
+  logo_text: string;
+  factory_count: number;
+}
+
+export interface ApiUsageSummary {
+  organization_id: string | null;
+  tier: string;
+  period: string;
+  counts: Record<string, number>;
+  free_limits: Record<string, number>;
+  note: string;
+}
+
+export interface ApiConsentRow {
+  factory_id: string;
+  factory_name: string;
+  data_source: string;
+  consent_to_share: boolean;
+  consent_updated_at: string;
+  visible_to_regulator: boolean;
+}
+
+export interface ApiVendorContact {
+  id: number;
+  category: string;
+  name: string;
+  contact_email: string;
+  phone: string;
+  region: string;
+  notes: string;
+}
+
+export interface ApiBrsrReport {
+  factory_id: string;
+  factory_name: string;
+  reporting_period: string;
+  principles: { principle: string; title: string; disclosures: { disclosure: string; value: number | string | null; source: string }[] }[];
+  methodology_note: string;
+}
+
+export interface ApiKeyResult {
+  key: string;
+  organization_id: string | null;
+  label: string;
+  rate_limit_per_min: number;
+  created_at: string;
+}
+
+export interface ApiFactorySummaryLite {
+  id: string;
+  name: string;
+  cluster_id: string;
+  sector: string;
+  lat: number;
+  lon: number;
+  data_source: string;
+  total_co2e_tpy: number;
+  worst_severity: "ok" | "warn" | "crit";
+  anomaly_check_status: string;
+  organization_id: string | null;
+}
+
 export const api = {
   clusters: () => getJson<ApiCluster[]>("/api/clusters"),
   factories: () => getJson<ApiFactory[]>("/api/factories"),
+  factoriesSummary: () => getJson<ApiFactorySummaryLite[]>("/api/factories/summary"),
   factory: (id: string) => getJson<ApiFactory>(`/api/factories/${id}`),
   anomalies: (factoryId: string) => getJson<ApiAnomaly[]>(`/api/factories/${factoryId}/anomalies`),
+  symbiosisNetwork: () => getJson<ApiSymbiosisMatch[]>("/api/symbiosis/network"),
   onboardFactory: (payload: unknown) => postJson<{ id: string; total_co2e_t: number; anomaly_check_status: string }>("/api/factories", payload),
+  scaleProjection: (factoryCount: number) => getJson<ApiScaleProjection>(`/api/scale-projection?factory_count=${factoryCount}`),
+  ask: (question: string, factoryId?: string | null) =>
+    postJson<ApiAskResult>("/api/ask", { question, factory_id: factoryId ?? null }),
+  askStream: (question: string, factoryId: string | null, onEvent: (event: AskStreamEvent) => void) =>
+    postSse("/api/ask/stream", { question, factory_id: factoryId ?? null }, onEvent),
+
+  // Organizations / white-labeling
+  organizations: () => getJson<ApiOrganization[]>("/api/organizations"),
+  createOrganization: (name: string, brandColor = "#3ea6ff", logoText = "") =>
+    postJson<ApiOrganization>("/api/organizations", { name, brand_color: brandColor, logo_text: logoText }),
+  setOrganizationTier: (orgId: string, tier: "free" | "pro") =>
+    patchJson<ApiOrganization>(`/api/organizations/${orgId}/tier`, { tier }),
+  assignFactoryOrganization: (factoryId: string, organizationId: string | null) =>
+    patchJson<ApiFactorySummaryLite>(`/api/factories/${factoryId}/organization`, { organization_id: organizationId }),
+
+  // Usage metering
+  trackUsage: (kind: "report_generated" | "chat_question" | "factory_onboarded", organizationId?: string | null, factoryId?: string | null) =>
+    postJson<{ status: string }>("/api/usage/track", { kind, organization_id: organizationId ?? null, factory_id: factoryId ?? null }),
+  usageSummary: (organizationId?: string | null) =>
+    getJson<ApiUsageSummary>(`/api/usage${organizationId ? `?organization_id=${organizationId}` : ""}`),
+
+  // Consent ledger
+  consentLedger: () => getJson<ApiConsentRow[]>("/api/consent-ledger"),
+  setFactoryConsent: (factoryId: string, consent: boolean) =>
+    patchJson<ApiConsentRow>(`/api/factories/${factoryId}/consent`, { consent_to_share: consent }),
+
+  // Vendor directory
+  vendors: (category?: string) => getJson<ApiVendorContact[]>(`/api/vendors${category ? `?category=${category}` : ""}`),
+
+  // BRSR export
+  brsrReport: (factoryId: string) => getJson<ApiBrsrReport>(`/api/factories/${factoryId}/brsr-report`),
+
+  // Public API tier
+  createApiKey: (orgId: string, label = "") => postJson<ApiKeyResult>(`/api/organizations/${orgId}/api-keys`, { label }),
 };

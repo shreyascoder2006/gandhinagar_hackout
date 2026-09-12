@@ -100,3 +100,22 @@ def waste_ratios() -> dict[str, dict]:
 def intervention_library() -> list[dict]:
     with open(BACKEND_DATA / "interventions.json", encoding="utf-8") as f:
         return json.load(f)
+
+
+@lru_cache
+def vendor_directory() -> list[dict]:
+    """Illustrative EPC/vendor contacts, 2-3 per intervention category
+    (matches app/db/seed_loader.py Intervention.category values). These are
+    NOT a vetted, sourced vendor panel — company names, phone numbers and
+    emails are plausible placeholders for demo purposes, tagged as such in
+    the API response's own docs, not presented as verified suppliers."""
+    return [
+        {"category": "heat-recovery", "name": "Thermax Waste Heat Systems", "contact_email": "projects@thermax-whr.example", "phone": "+91 20 6603 0000", "region": "Gujarat / Pan-India", "notes": "Illustrative contact — waste-heat recovery EPC, kiln/boiler retrofit experience."},
+        {"category": "heat-recovery", "name": "Enviro-Tech Heat Solutions", "contact_email": "sales@envirotechheat.example", "phone": "+91 79 4001 2200", "region": "Ahmedabad", "notes": "Illustrative contact — regional WHR integrator for SME-scale kilns and dryers."},
+        {"category": "process-change", "name": "GreenLine Process Consultants", "contact_email": "hello@greenlineprocess.example", "phone": "+91 22 6810 5500", "region": "Gujarat / Maharashtra", "notes": "Illustrative contact — process optimisation and firing-curve retuning studies."},
+        {"category": "process-change", "name": "Suzlon Industrial Efficiency Cell", "contact_email": "efficiency@suzlon-ind.example", "phone": "+91 261 220 1188", "region": "Surat", "notes": "Illustrative contact — process audits for textile/chemical process lines."},
+        {"category": "material-substitution", "name": "MatSub Advisory", "contact_email": "advisory@matsub.example", "phone": "+91 79 2630 4400", "region": "Gujarat", "notes": "Illustrative contact — alternate-fuel and raw-material substitution studies."},
+        {"category": "waste-to-input", "name": "CircularLoop Exchange Partners", "contact_email": "partners@circularloop.example", "phone": "+91 265 235 7700", "region": "Vadodara", "notes": "Illustrative contact — waste-to-input brokering and logistics setup."},
+        {"category": "waste-to-input", "name": "Gujarat Enviro Infrastructure Ltd (GEIL)-style broker", "contact_email": "industrial@geil-broker.example", "phone": "+91 79 2686 1122", "region": "Gujarat", "notes": "Illustrative contact — regional industrial-symbiosis facilitation."},
+        {"category": "recycling-loop", "name": "LoopBack Recovery Systems", "contact_email": "contact@loopbackrecovery.example", "phone": "+91 261 398 4433", "region": "Surat / Vapi", "notes": "Illustrative contact — closed-loop recovery system integrators."},
+    ]

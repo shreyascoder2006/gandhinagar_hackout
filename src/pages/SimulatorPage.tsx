@@ -1,6 +1,7 @@
 import FactoryTwin from "../components/twin/FactoryTwin";
 import InterventionPicker from "../components/simulator/InterventionPicker";
 import ImpactPanel from "../components/simulator/ImpactPanel";
+import ProGate from "../components/business/ProGate";
 import { useFactoryStore } from "../store/useFactoryStore";
 
 export default function SimulatorPage() {
@@ -22,17 +23,19 @@ export default function SimulatorPage() {
         </span>
       </div>
 
-      <div className="grid flex-1 grid-cols-1 gap-3 overflow-hidden lg:grid-cols-[330px_1fr_380px]">
-        <div className="overflow-hidden">
-          <InterventionPicker baseline={baseline} />
+      <ProGate feature="The what-if simulator" className="flex-1">
+        <div className="grid h-full grid-cols-1 gap-3 overflow-hidden lg:grid-cols-[330px_1fr_380px]">
+          <div className="overflow-hidden">
+            <InterventionPicker baseline={baseline} />
+          </div>
+          <div className="glass overflow-hidden rounded-xl">
+            <FactoryTwin factory={simulated} />
+          </div>
+          <div className="overflow-hidden">
+            <ImpactPanel baseline={baseline} />
+          </div>
         </div>
-        <div className="glass overflow-hidden rounded-xl">
-          <FactoryTwin factory={simulated} />
-        </div>
-        <div className="overflow-hidden">
-          <ImpactPanel baseline={baseline} />
-        </div>
-      </div>
+      </ProGate>
     </main>
   );
 }

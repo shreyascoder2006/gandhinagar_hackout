@@ -1,14 +1,16 @@
 import { Fragment, useMemo } from "react";
 import { MapContainer, TileLayer, CircleMarker, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { findMatches, matchesFor } from "../../lib/symbiosis";
+import { matchesFor } from "../../lib/symbiosis";
 import { useFactoryStore } from "../../store/useFactoryStore";
 import { formatInr } from "../../lib/severity";
+import ProGate from "../business/ProGate";
 import type { Factory } from "../../types";
 
 export default function SymbiosisPanel({ factory }: { factory: Factory }) {
   const factories = useFactoryStore((s) => s.factories);
-  const matches = useMemo(() => matchesFor(factory.id, findMatches(factories)), [factory.id, factories]);
+  const symbiosisMatches = useFactoryStore((s) => s.symbiosisMatches);
+  const matches = useMemo(() => matchesFor(factory.id, symbiosisMatches), [factory.id, symbiosisMatches]);
 
   const totalCo2 = matches.reduce((a, m) => a + m.co2AvoidedTpy, 0);
   const mySaving = matches.reduce((a, m) => a + (m.sourceId === factory.id ? m.sourceSavingInr : m.targetSavingInr), 0);
@@ -25,6 +27,7 @@ export default function SymbiosisPanel({ factory }: { factory: Factory }) {
           No waste-to-input matches for this unit in the current cohort.
         </div>
       ) : (
+        <ProGate feature="Industrial symbiosis matching" className="flex-1">
         <div className="flex flex-1 flex-col overflow-hidden">
           <div className="grid grid-cols-3 gap-2 p-3">
             {[
@@ -77,6 +80,7 @@ export default function SymbiosisPanel({ factory }: { factory: Factory }) {
             })}
           </div>
         </div>
+        </ProGate>
       )}
     </div>
   );

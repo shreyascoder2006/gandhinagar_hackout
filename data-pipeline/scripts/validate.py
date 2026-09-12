@@ -81,6 +81,13 @@ def main():
             if rec["hazardous_waste_t"] < 0 or rec["general_process_waste_t"] < 0:
                 errors.append(f"{fac['id']}: negative waste tonnage in {rec['month']}")
 
+        for stream in fac.get("waste_streams", []):
+            if stream["tpy"] < 0:
+                errors.append(f"{fac['id']}: negative waste_stream tpy for tag '{stream['tag']}'")
+        for inp in fac.get("accepted_inputs", []):
+            if inp["max_tpy"] < 0:
+                errors.append(f"{fac['id']}: negative accepted_input max_tpy for tag '{inp['tag']}'")
+
     # --- 2. Round-trip through the real engine formula ---------------------
     # tCO2e = canonical_qty * kgco2e_per_unit / 1000 (backend/app/engine/emissions.py)
     # Recompute each process-month's implied intensity. A factory that simply

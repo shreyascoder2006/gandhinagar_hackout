@@ -104,9 +104,13 @@ anomalies (precision 0.04, recall 1.00). Root cause is twofold:
 A threshold sweep against the 26-label ground truth (`synth/anomaly_ground_truth.json`)
 found `z_limit=2.5, rel_guard=0.15` gives precision 0.57 / recall 0.92 (24/26 real
 anomalies caught, false positives cut from 575 to 18) — applied as the new default in
-`anomaly.py`. This is disclosed rather than hidden because it is exactly the failure mode
-(false positives from normal behaviour) this whole project is designed around avoiding —
-see `CLAUDE.md`. **This is a stopgap, not a fix**: the real long-term answer is Phase 3's
+`anomaly.py`. (These exact counts are frozen from the 26-label dataset at the time of this
+fix; regenerating the synthetic data shifts the RNG sequence and label count slightly — the
+current live precision/recall, regression-tested on every run, is in
+`validation/baseline_metrics.json` via `scripts/validate_all.py`.) This is disclosed rather
+than hidden because it is exactly the failure mode (false positives from normal behaviour)
+this whole project is designed around avoiding — see `CLAUDE.md`. **This is a stopgap, not
+a fix**: the real long-term answer is Phase 3's
 PyTorch autoencoder, which can learn each factory's own seasonal shape instead of applying
 one flat threshold to a raw monthly series — see the Induscope roadmap.
 
@@ -116,3 +120,30 @@ The tonnage/output ranges used to size each synthetic factory (e.g. "20,000–60
 a ceramics unit) are order-of-magnitude judgement calls consistent with publicly known GIDC
 SME scale, not read from a specific cited study. Tagged `is_placeholder` in
 `synth/generate_synthetic.py`'s config and in the disclosure doc.
+
+## 9. Synthetic performance-ratio noise had zero covariate signal (found and fixed in Phase 3a)
+
+Building the Phase 3a LightGBM benchmark predictor (`ml/benchmark_model.py`) surfaced a real
+gap: the original synthetic generator drew each factory's deviation from benchmark
+(`factory_performance_ratio`) as pure independent noise (`rng.uniform(0.80, 1.45)`), with
+**no correlation to output scale, fuel mix, or any other feature**. Under that data-generating
+process, the flat per-sub-sector benchmark is mathematically the optimal predictor — no model
+could ever legitimately beat it, and a first LightGBM attempt correctly failed to (it scored
+worse than the flat benchmark, exactly as it should given the data had no learnable structure
+beyond it).
+
+**Fixed at the source, not in the model**: added a documented economies-of-scale effect to
+`generate_synthetic.py` — factories at the larger end of their sector's output range now run
+closer to (or better than) benchmark than smaller ones, a real and well-known industrial
+pattern (better instrumentation, more consistent throughput, amortised process-control
+investment at scale). The specific magnitude (1.18x at the small end of a sector's range down
+to 0.86x at the large end, layered with continued random noise) is a documented modelling
+choice, not a cited coefficient — tagged `calibrated`, not `real`.
+
+**Result after the fix** (see `ml/artifacts/benchmark_metrics.json` for the full report):
+predicting the *ratio* to benchmark (not raw intensity — trees don't cleanly learn a
+multiplicative rescaling across process kinds with very different benchmark scales) beats the
+flat benchmark by +36.9% MAE for factories in clusters already seen in training data, and by a
+more modest +6.3% for a factory in a brand-new, never-before-seen cluster. Both regimes are
+reported, not just the flatteringly larger one, because they answer genuinely different
+deployment questions.

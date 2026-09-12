@@ -4,8 +4,42 @@ import { motion } from "framer-motion";
 import { useFactoryStore } from "../store/useFactoryStore";
 import { buildActionPlan, planToMarkdown, type PlanItem, type PhaseSummary } from "../lib/actionplan";
 import { formatInr, severityColor, confidenceLabel } from "../lib/severity";
+import { api, type ApiVendorContact } from "../lib/api";
 
 const phaseAccent: Record<PhaseSummary["phase"], string> = { "30": "#22c55e", "90": "#3ea6ff", "365": "#a78bfa" };
+
+function VendorFinder({ category }: { category: string }) {
+  const [open, setOpen] = useState(false);
+  const [vendors, setVendors] = useState<ApiVendorContact[] | null>(null);
+
+  const toggle = () => {
+    setOpen((o) => !o);
+    if (!vendors) api.vendors(category).then(setVendors).catch(() => setVendors([]));
+  };
+
+  return (
+    <div className="mt-2 border-t border-[color:var(--color-border)] pt-2">
+      <button onClick={toggle} className="text-[11px] text-[color:var(--color-accent)] hover:underline">
+        {open ? "Hide vendors ▲" : "Find a vendor →"}
+      </button>
+      {open && (
+        <div className="mt-1.5 space-y-1.5">
+          {vendors === null ? (
+            <div className="text-[10px] text-[color:var(--color-muted)]">Loading…</div>
+          ) : vendors.length === 0 ? (
+            <div className="text-[10px] text-[color:var(--color-muted)]">No vendor contacts on file for this category yet.</div>
+          ) : vendors.map((v) => (
+            <div key={v.id} className="rounded-md border border-[color:var(--color-border)] bg-[color:var(--color-panel)] p-2 text-[10px]">
+              <div className="font-semibold">{v.name} <span className="font-normal text-[color:var(--color-muted)]">· {v.region}</span></div>
+              <div className="text-[color:var(--color-muted)]">{v.contact_email} · {v.phone}</div>
+              <div className="mt-0.5 italic text-[color:var(--color-muted)]">{v.notes}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function ItemCard({ item, accent }: { item: PlanItem; accent: string }) {
   const iv = item.intervention;
@@ -57,6 +91,7 @@ function ItemCard({ item, accent }: { item: PlanItem; accent: string }) {
           <dd>{confidenceLabel[iv.confidence]}</dd>
         </div>
       </dl>
+      <VendorFinder category={iv.category} />
     </motion.div>
   );
 }

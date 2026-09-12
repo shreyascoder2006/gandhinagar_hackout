@@ -82,6 +82,9 @@ body,
 .jarvis-orb { display: inline-block; width: 12px; height: 12px; border-radius: 999px; background: #3ea6ff; box-shadow: 0 0 0 4px #3ea6ff22, 0 0 15px #3ea6ff; animation: jarvis-pulse 1.8s ease-in-out infinite; }
 @keyframes jarvis-pulse { 50% { transform: scale(1.25); box-shadow: 0 0 0 7px #3ea6ff10, 0 0 22px #3ea6ff; } }
 
+.jarvis-cursor { display: inline-block; width: 6px; height: 12px; margin-left: 2px; background: #3ea6ff; vertical-align: -1px; animation: jarvis-blink 0.9s step-end infinite; }
+@keyframes jarvis-blink { 50% { opacity: 0; } }
+
 @media print {
   html, body, #root { height: auto; background: #fff; color: #111; }
   header { display: none; }

@@ -15,8 +15,11 @@ export interface EmissionFactor {
 }
 
 export const emissionFactors: EmissionFactor[] = [
-  { key: "grid_electricity", label: "Grid electricity (Gujarat)", canonicalUnit: "kWh", kgco2ePerUnit: 0.71, gjPerUnit: 0.0036, source: "CEA CO₂ Baseline Database v19 (weighted average, 2023-24)", confidence: "high", units: { kWh: 1, MWh: 1000, units: 1 } },
-  { key: "natural_gas", label: "Natural gas (PNG)", canonicalUnit: "SCM", kgco2ePerUnit: 2.04, gjPerUnit: 0.0364, source: "IPCC 2006 Vol.2 Table 2.2 (56.1 kgCO₂/GJ) × NCV 36.4 MJ/SCM", confidence: "high", units: { SCM: 1, "m³": 1, MMBTU: 28.3, kSCM: 1000 } },
+  // grid_electricity corrected from 0.71 -> 0.727: the old value was actually
+  // CEA v21.0/FY2024-25's figure mislabelled as v19.0/FY2023-24 — see
+  // data-pipeline/sources.md #1 for the version-mismatch this fixes.
+  { key: "grid_electricity", label: "Grid electricity (Gujarat)", canonicalUnit: "kWh", kgco2ePerUnit: 0.727, gjPerUnit: 0.0036, source: "CEA CO₂ Baseline Database v19.0 (weighted average emission factor, FY2023-24)", confidence: "high", units: { kWh: 1, MWh: 1000, units: 1 } },
+  { key: "natural_gas", label: "Natural gas (PNG)", canonicalUnit: "SCM", kgco2ePerUnit: 2.04, gjPerUnit: 0.0364, source: "IPCC 2006 Vol.2 Table 2.2 (56.1 kgCO₂/GJ) × NCV 36.4 MJ/SCM", confidence: "high", units: { SCM: 1, "m³": 1, m3: 1, MMBTU: 28.3, kSCM: 1000 } },
   { key: "coal", label: "Indian non-coking coal", canonicalUnit: "t", kgco2ePerUnit: 1700, gjPerUnit: 18.0, source: "IPCC 94.6 kgCO₂/GJ × India NCV ~18 GJ/t (MoEFCC BUR-3)", confidence: "high", units: { t: 1, tonne: 1, kg: 0.001 } },
   { key: "pet_coke", label: "Petroleum coke", canonicalUnit: "t", kgco2ePerUnit: 3200, gjPerUnit: 32.5, source: "IPCC 97.5 kgCO₂/GJ × NCV 32.5 GJ/t", confidence: "high", units: { t: 1, tonne: 1, kg: 0.001 } },
   { key: "furnace_oil", label: "Furnace oil / HFO", canonicalUnit: "L", kgco2ePerUnit: 3.11, gjPerUnit: 0.0402, source: "IPCC 77.4 kgCO₂/GJ × NCV 40.2 MJ/L", confidence: "high", units: { L: 1, kL: 1000, litre: 1 } },

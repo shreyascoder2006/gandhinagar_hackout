@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useFactoryStore } from "../store/useFactoryStore";
-import { severityColor } from "../lib/severity";
+import { severityColor, formatInr } from "../lib/severity";
+import { api, type ApiOrganization } from "../lib/api";
 import type { Factory, Severity } from "../types";
 
 type SortKey = "co2" | "deviation" | "hotspots" | "avoidable";
@@ -10,8 +11,11 @@ function deviationPct(f: Factory): number {
   const w = f.nodes.reduce((a, n) => a + n.co2eTpy, 0) || 1;
   return Math.round((f.nodes.reduce((a, n) => a + ((n.actualIntensity - n.benchmarkIntensity) / n.benchmarkIntensity) * n.co2eTpy, 0) / w) * 100);
 }
+// Best single recommendation per process — matches the backend's convention
+// (backend/app/routers/factories.py). Falls back to a local computation only
+// for factories the API hasn't tagged yet (e.g. a just-added intake draft).
 function avoidable(f: Factory): number {
-  return f.nodes.reduce((a, n) => a + ([...n.interventions].sort((x, y) => y.co2ReductionTpy - x.co2ReductionTpy)[0]?.co2ReductionTpy ?? 0), 0);
+  return f.avoidableCo2eTpy ?? f.nodes.reduce((a, n) => a + ([...n.interventions].sort((x, y) => y.co2ReductionTpy - x.co2ReductionTpy)[0]?.co2ReductionTpy ?? 0), 0);
 }
 function worst(f: Factory): Severity {
   if (f.nodes.some((n) => n.severity === "crit")) return "crit";
@@ -26,6 +30,30 @@ export default function PortfolioPage() {
   const navigate = useNavigate();
   const [sort, setSort] = useState<SortKey>("avoidable");
   const [cluster, setCluster] = useState<string>("all");
+  const [orgs, setOrgs] = useState<ApiOrganization[]>([]);
+  const [orgByFactoryId, setOrgByFactoryId] = useState<Record<string, string | null>>({});
+  const [newOrgName, setNewOrgName] = useState("");
+
+  const loadOrgs = () => {
+    api.organizations().then(setOrgs).catch(() => {});
+    api.factoriesSummary().then((rows) => {
+      setOrgByFactoryId(Object.fromEntries(rows.map((r) => [r.id, r.organization_id])));
+    }).catch(() => {});
+  };
+  useEffect(loadOrgs, []);
+
+  const createOrg = async () => {
+    if (!newOrgName.trim()) return;
+    await api.createOrganization(newOrgName.trim());
+    setNewOrgName("");
+    loadOrgs();
+  };
+
+  const assign = async (factoryId: string, organizationId: string) => {
+    setOrgByFactoryId((prev) => ({ ...prev, [factoryId]: organizationId || null }));
+    await api.assignFactoryOrganization(factoryId, organizationId || null);
+    loadOrgs();
+  };
 
   const rows = useMemo(() => {
     const r = factories
@@ -37,6 +65,7 @@ export default function PortfolioPage() {
 
   const clusters = [...new Set(factories.map((f) => f.cluster.split(",")[0]))];
   const totalAvoid = rows.reduce((a, r) => a + r.avoid, 0);
+  const totalCreditValue = rows.reduce((a, r) => a + (r.f.carbonCreditValueInrPerYear ?? 0), 0);
 
   const open = (id: string) => {
     setFactory(id);
@@ -64,18 +93,39 @@ export default function PortfolioPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         {[
           ["Factories", String(rows.length)],
           ["Portfolio CO₂e / yr", `${rows.reduce((a, r) => a + r.f.totalCo2eTpy, 0).toLocaleString("en-IN")} t`],
           ["Avoidable CO₂e / yr", `${totalAvoid.toLocaleString("en-IN")} t`],
           ["Hotspot processes", String(rows.reduce((a, r) => a + r.hot, 0))],
+          ["Carbon-credit value / yr*", formatInr(totalCreditValue)],
         ].map(([k, v]) => (
           <div key={k} className="glass rounded-xl px-4 py-3">
             <div className="text-[11px] uppercase tracking-wide text-[color:var(--color-muted)]">{k}</div>
             <div className="text-lg font-semibold">{v}</div>
           </div>
         ))}
+      </div>
+      <p className="-mt-2 text-[10px] italic text-[color:var(--color-muted)]">
+        *Illustrative — indicative CCTS pricing, not an official or mandated price.
+      </p>
+
+      <div className="glass flex flex-wrap items-center gap-2 rounded-xl px-4 py-2.5">
+        <span className="text-[11px] font-semibold">Organizations (white-labeled workspaces):</span>
+        {orgs.map((o) => (
+          <span key={o.id} className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px]" style={{ borderColor: o.brand_color, color: o.brand_color }}>
+            {o.logo_text || o.name} · {o.factory_count} factories · {o.tier}
+          </span>
+        ))}
+        <input
+          value={newOrgName}
+          onChange={(e) => setNewOrgName(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && createOrg()}
+          placeholder="New organization name"
+          className="rounded-md border border-[color:var(--color-border)] bg-[color:var(--color-panel-2)] px-2 py-1 text-[11px] outline-none"
+        />
+        <button onClick={createOrg} className="rounded-md border border-[color:var(--color-border)] px-2 py-1 text-[11px] hover:bg-[color:var(--color-panel-2)]">+ Create</button>
       </div>
 
       <div className="glass flex-1 overflow-auto rounded-xl">
@@ -91,6 +141,8 @@ export default function PortfolioPage() {
               <th className="px-3 py-2.5 text-right font-medium">Circularity</th>
               <th className="px-3 py-2.5 text-right font-medium">Implemented</th>
               <th className="px-3 py-2.5 text-left font-medium">Data</th>
+              <th className="px-3 py-2.5 text-left font-medium">Organization</th>
+              <th className="px-3 py-2.5 text-right font-medium">Report</th>
             </tr>
           </thead>
           <tbody>
@@ -116,6 +168,21 @@ export default function PortfolioPage() {
                 <td className="px-3 py-2.5 text-right">{f.implementedInterventionIds.length}</td>
                 <td className="px-3 py-2.5">
                   <span className="rounded-full border border-[color:var(--color-warn)]/50 px-1.5 py-0.5 text-[10px] text-[color:var(--color-warn)]">{f.dataSource}</span>
+                </td>
+                <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
+                  <select
+                    value={orgByFactoryId[f.id] ?? ""}
+                    onChange={(e) => assign(f.id, e.target.value)}
+                    className="rounded-md border border-[color:var(--color-border)] bg-[color:var(--color-panel-2)] px-1.5 py-1 text-[10px]"
+                  >
+                    <option value="">Unassigned</option>
+                    {orgs.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+                  </select>
+                </td>
+                <td className="px-3 py-2.5 text-right" onClick={(e) => e.stopPropagation()}>
+                  <Link to={`/report/${f.id}`} className="text-[11px] text-[color:var(--color-accent)] hover:underline">
+                    Open →
+                  </Link>
                 </td>
               </tr>
             ))}

@@ -19,6 +19,72 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
 
 
+class Organization(Base):
+    """A consulting firm / SME group workspace — the unit white-labeled
+    reports and portfolio grouping hang off. Not an auth system: no login,
+    no real user accounts. `tier` gates simulator/symbiosis/report/BRSR
+    features in the frontend and the free-report usage meter below."""
+    __tablename__ = "organizations"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    tier: Mapped[str] = mapped_column(String, default="free")  # free | pro
+    brand_color: Mapped[str] = mapped_column(String, default="#3ea6ff")
+    logo_text: Mapped[str] = mapped_column(String, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    factories: Mapped[list["Factory"]] = relationship(back_populates="organization")
+
+
+class UsageEvent(Base):
+    """One countable action against the freemium usage meter (report
+    generated, chat question asked, factory onboarded). Real counter behind
+    the "3 of 5 free reports used" UI — not a client-side guess. Logged by
+    routers/business.py's POST /api/usage/track, called from the frontend
+    at the moment each action actually happens."""
+    __tablename__ = "usage_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    organization_id: Mapped[Optional[str]] = mapped_column(ForeignKey("organizations.id"), nullable=True)
+    kind: Mapped[str] = mapped_column(String, nullable=False)  # report_generated | chat_question | factory_onboarded
+    factory_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class VendorContact(Base):
+    """Seeded static directory — 2-3 illustrative EPC/vendor contacts per
+    intervention category (heat-recovery, process-change, etc.), so a
+    recommendation can answer "who do I call", not just "what to do". Contact
+    details are placeholder/illustrative, not a vetted vendor panel — see
+    app/seed.py vendor_directory() docstring."""
+    __tablename__ = "vendor_contacts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    category: Mapped[str] = mapped_column(String, nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    contact_email: Mapped[str] = mapped_column(String, nullable=False)
+    phone: Mapped[str] = mapped_column(String, nullable=False)
+    region: Mapped[str] = mapped_column(String, nullable=False)
+    notes: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class ApiKey(Base):
+    """A minted key for the public read-only API tier (routers/business.py
+    require_api_key). Rate limiting is an in-memory sliding window keyed by
+    this key (see routers/business.py _RATE_LIMITER) — real for the life of
+    one server process, not a distributed/persisted limiter; disclosed as a
+    demo simplification, not hidden."""
+    __tablename__ = "api_keys"
+
+    key: Mapped[str] = mapped_column(String, primary_key=True)
+    organization_id: Mapped[Optional[str]] = mapped_column(ForeignKey("organizations.id"), nullable=True)
+    label: Mapped[str] = mapped_column(String, default="")
+    rate_limit_per_min: Mapped[int] = mapped_column(Integer, default=30)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    last_used_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    request_count: Mapped[int] = mapped_column(Integer, default=0)
+
+
 class Cluster(Base):
     __tablename__ = "clusters"
 
@@ -46,12 +112,17 @@ class Factory(Base):
     lon: Mapped[float] = mapped_column(Float)
     data_source: Mapped[str] = mapped_column(String, default="synthetic")  # synthetic | self_reported
     consent_to_share: Mapped[bool] = mapped_column(Boolean, default=True)
+    consent_updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     output_tonnes_per_year: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    organization_id: Mapped[Optional[str]] = mapped_column(ForeignKey("organizations.id"), nullable=True)
 
     cluster: Mapped["Cluster"] = relationship(back_populates="factories")
+    organization: Mapped[Optional["Organization"]] = relationship(back_populates="factories")
     equipment: Mapped[list["Equipment"]] = relationship(back_populates="factory", cascade="all, delete-orphan")
     waste_records: Mapped[list["WasteRecord"]] = relationship(back_populates="factory", cascade="all, delete-orphan")
+    waste_streams: Mapped[list["WasteStream"]] = relationship(back_populates="factory", cascade="all, delete-orphan")
+    accepted_inputs: Mapped[list["AcceptedInput"]] = relationship(back_populates="factory", cascade="all, delete-orphan")
 
 
 class Equipment(Base):
@@ -110,6 +181,40 @@ class WasteRecord(Base):
     factory: Mapped["Factory"] = relationship(back_populates="waste_records")
 
 
+class WasteStream(Base):
+    """A tagged waste stream a factory outputs — the input side of symbiosis
+    matching. Distinct from WasteRecord (monthly aggregate hazardous/general
+    tonnage): this is per-tag, sized off that aggregate, and is what the
+    Phase 3c matcher (ml/symbiosis_model.py) actually matches on. See
+    data-pipeline/clean/waste_stream_profiles.csv for sourcing."""
+    __tablename__ = "waste_streams"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    factory_id: Mapped[str] = mapped_column(ForeignKey("factories.id"), nullable=False)
+    tag: Mapped[str] = mapped_column(String, nullable=False)
+    label: Mapped[str] = mapped_column(String, nullable=False)
+    form: Mapped[str] = mapped_column(String, nullable=False)  # solid | liquid | heat
+    tpy: Mapped[float] = mapped_column(Float, nullable=False)
+    disposal_cost_inr_per_t: Mapped[float] = mapped_column(Float, nullable=False)
+
+    factory: Mapped["Factory"] = relationship(back_populates="waste_streams")
+
+
+class AcceptedInput(Base):
+    """A tagged material a factory could accept as input — the demand side of
+    symbiosis matching. See data-pipeline/clean/waste_stream_profiles.csv."""
+    __tablename__ = "accepted_inputs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    factory_id: Mapped[str] = mapped_column(ForeignKey("factories.id"), nullable=False)
+    tag: Mapped[str] = mapped_column(String, nullable=False)
+    label: Mapped[str] = mapped_column(String, nullable=False)
+    max_tpy: Mapped[float] = mapped_column(Float, nullable=False)
+    virgin_cost_inr_per_t: Mapped[float] = mapped_column(Float, nullable=False)
+
+    factory: Mapped["Factory"] = relationship(back_populates="accepted_inputs")
+
+
 class EmissionRecord(Base):
     """CO2e for one equipment-month-fuel, computed by app/engine/emissions.co2e_for.
     Formula: tCO2e = canonical_qty * kgco2e_per_unit / 1000. Never hand-entered."""
@@ -166,9 +271,12 @@ class Recommendation(Base):
 
 
 class SymbiosisMatch(Base):
-    """Reserved for Phase 3 (MiniLM + FAISS symbiosis matcher) — schema exists,
-    no rows are written until that matcher is actually built. Do not seed fake
-    matches here; an empty table is the honest state until Phase 3 lands."""
+    """Populated by ml/symbiosis_model.py (Phase 3c) — MiniLM semantic
+    similarity + quantity fit + proximity, weighted 50/25/25 per the Induscope
+    vision doc. The full score breakdown is stored, not just the blend, so
+    the API/frontend can show why a match ranked where it did rather than a
+    bare number. co2_avoided_tpy is always is_placeholder=True: no sourced
+    embodied-carbon dataset exists for these waste categories yet."""
     __tablename__ = "symbiosis_matches"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -178,7 +286,17 @@ class SymbiosisMatch(Base):
     quantity_tpy: Mapped[float] = mapped_column(Float, nullable=False)
     distance_km: Mapped[float] = mapped_column(Float, nullable=False)
     semantic_score: Mapped[float] = mapped_column(Float, nullable=False)
+    quantity_fit_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    proximity_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    overall_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     co2_avoided_tpy: Mapped[float] = mapped_column(Float, nullable=False)
+    # Real, computed from the provider's own disposal_cost_inr_per_t and the
+    # recipient's own virgin_cost_inr_per_t (data-pipeline/clean/waste_stream_profiles.csv)
+    # — the tonnage and cost rates are real, only the assumption that a
+    # recipient captures 60% of the virgin-material price as savings is a
+    # documented modelling choice (same 60% the pre-existing frontend used).
+    provider_saving_inr: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    recipient_saving_inr: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     is_placeholder: Mapped[bool] = mapped_column(Boolean, default=True)
 
 
