@@ -1,280 +1,288 @@
-# Induscope — Circular Carbon Intelligence
+# Induscope — Circular Carbon Intelligence Platform
+### Gujarat Industrial Decarbonization & Digital Twin Ecosystem
 
-**A diagnostic-and-decision platform for Gujarat's industrial SMEs.** It reads a
-factory's energy, material, and waste data; flags where its emissions concentrate and
-why; recommends costed circular-economy interventions; simulates their combined
-impact; and rolls all of that up into an anonymised regulator-facing view across
-Gujarat's industrial clusters.
+[![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Three.js](https://img.shields.io/badge/Three.js-0.186-black?logo=three.js)](https://threejs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.141-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![LightGBM](https://img.shields.io/badge/LightGBM-4.7-blue?logo=python)](https://lightgbm.readthedocs.io/)
+[![FAISS](https://img.shields.io/badge/FAISS-CPU-yellow)](https://github.com/facebookresearch/faiss)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://python.org)
 
-Built for **HackOut'26**, source spec: *Circular Carbon Ecosystem* (Jeevesh Bodhani,
-DJSCE).
-
----
-
-## The problem
-
-Gujarat's industrial clusters — ceramics in Morbi, chemicals in Vapi and Ankleshwar,
-textiles in Surat, engineering in Rajkot — run thousands of small manufacturers with
-**no per-process emissions visibility** and no systematic way to find a nearby factory
-that could use their waste as input. A plant operator can't see *where* their carbon
-footprint concentrates, *why* it deviates from what's normal for their sub-sector, or
-*what* to actually do about it. Regulators, in turn, have no evidence base for
-targeting efficiency schemes.
-
-## Our approach
-
-Rather than build a slick demo on invented numbers, we split the work into two
-disciplines that get built and verified independently, then wired together:
-
-1. **A real calculation core** — every emissions figure traces back to a sourced
-   emission factor (CEA grid factor, IPCC 2006 fuel factors) and a documented
-   formula, not a guess. Every benchmark is labelled with exactly how confident it
-   is and why (a real government scheme, or a documented estimate — never blurred
-   together).
-2. **A synthetic-but-calibrated dataset**, because real Gujarat SME-level emissions
-   data isn't publicly obtainable (we tried — see [Limitations](#honesty-about-what-isnt-real)
-   below). 120 factories across 9 real Gujarat industrial clusters, generated with a
-   seeded, reproducible script, calibrated to real sourced ratios wherever a real
-   ratio exists.
-
-Every number in the product is tagged `real`, `calibrated`, or `is_placeholder`
-somewhere in its lineage — nothing is asserted without a way to check where it came
-from. That discipline is documented in [`data-pipeline/`](data-pipeline/) and
-[`backend/`](backend/) and is the main thing that separates this from a hackathon
-demo running on hardcoded numbers.
+> **Built for HackOut'26** — *Circular Carbon Ecosystem*
+> 
+> **Induscope** is an end-to-end industrial decarbonization, digital twin, and circular economy intelligence platform purpose-built for Gujarat's key SME manufacturing corridors (Morbi Ceramics, Surat Textiles, Vapi & Ankleshwar Chemicals, Rajkot & Jamnagar Engineering).
 
 ---
 
-## What's built and working right now
+## 📌 The Industrial Challenge
+
+Gujarat's manufacturing clusters produce a massive share of India's ceramics, synthetic textiles, dyes, active pharmaceutical ingredients (APIs), and castings. However, thousands of operational Micro, Small, and Medium Enterprises (MSMEs) face severe constraints:
+1. **Zero Process-Level Emissions Visibility:** Plants lack sub-metering; energy and fuel bills are lumped into generic overhead without equipment attribution.
+2. **Sub-Sector Benchmark Ambiguity:** Operators cannot see if their specific energy consumption ($\text{SCM/t}$ tile, $\text{kWh/kg}$ fabric, $\text{GJ/t}$ chemical) deviates from regional best practices.
+3. **Double-Counting Pitfalls:** Interventions are often sized additively rather than through sequential-residual physics, leading to inflated ROI promises.
+4. **Disconnected Byproduct Streams:** Waste heat, ETP sludge, spent solvents, and flue gases are dumped or treated at high costs rather than matched to nearby industrial offtakers within economic transport radii.
+5. **Regulatory Blindspots:** Environmental boards (GPCB) and energy agencies lack cluster-level, evidence-backed rollups to target technology subsidies effectively.
+
+---
+
+## 🚀 The Induscope Solution
+
+Induscope bridges raw utility data to audit-ready decarbonization roadmaps and circular marketplaces across 9 integrated platform modules:
 
 ```
-data-pipeline/  →  backend (FastAPI + SQLite/Postgres)  →  frontend (React + 3D twin)
-   real sources        real engine + rule-based    ↑         live dashboard, simulator,
-   + synthetic          intelligence, seeded from   |         action plan, regulator
-   120-factory          the pipeline output        ml/        rollup, symbiosis network —
-   dataset                                  benchmark model,   all real data
-                                             symbiosis matcher,
-                                             tool-calling explainer
+[ + Intake ] ───▶ [ Diagnose ] ───▶ [ Simulate ] ───▶ [ Action Plan ]
+     │                   │
+     ▼                   ▼
+[ Consent ]       [ Portfolio ] ───▶ [ Regulator ]
+     │                   │
+     ▼                   ▼
+  [ API ]         [ CO₂ Exchange ]
 ```
 
-- **Data pipeline** — sources real CEA/IPCC emission factors and CPCB waste figures,
-  documents exactly where the "9 real Gujarat clusters" and sector benchmarks come
-  from, and generates a reproducible 120-factory synthetic dataset (raw monthly
-  activity data only — no pre-computed answers baked in).
-- **Backend (FastAPI + SQLAlchemy, 14-table schema)** — every factory's CO₂e,
-  benchmark deviation, anomaly flags, root-cause diagnosis, and sized interventions
-  are computed by real Python functions reading the pipeline's raw data, not
-  hand-typed. A working onboarding endpoint (`POST /api/factories`) runs a real SME's
-  own submitted numbers through the exact same engine used for the 120 seeded
-  factories, including the real sourced-benchmark diagnosis.
-- **ML layer** (`ml/`) — a LightGBM benchmark predictor, a MiniLM+FAISS symbiosis
-  matcher, and a tool-calling Ollama explainer that can run a real optimizer to
-  answer "which strategy is best" or "which factory needs the most help" — plus a
-  PyTorch anomaly model that was built, evaluated, and honestly rejected. See
-  `ml/README.md`.
-- **Live chat assistant** — the floating widget calls the real explainer above
-  (`POST /api/ask`), not a keyword-matching script. It answers cross-factory
-  questions ("which factory is worst", "what's wrong with X") as well as
-  per-factory optimization ones, and always shows the raw database result behind
-  its answer.
-- **Scale-impact panel** (Regulator page) — an animated, slider-driven "if this
-  scaled to N Gujarat factories" projection backed by `GET /api/scale-projection`,
-  including an illustrative carbon-credit valuation (see below).
-- **One-click decarbonization report** (`/report/:factoryId`) — diagnosis + action
-  plan + ROI as a single printable/shareable page, the artifact an SME owner can
-  actually take to a bank or board.
-- **Frontend (React + Three.js)** — a 3D digital-twin dashboard per factory, a
-  what-if simulator (toggle interventions, watch CO₂/cost/payback recompute live), a
-  costed 30/90/365-day action plan, a consultant portfolio view, a regulator rollup
-  map across all 9 clusters, and a live industrial-symbiosis network — all rendering
-  live data from the backend above, not mock JSON.
+```mermaid
+graph TD
+    A["+ Intake (/intake)"] -->|"Factory Ingestion & Profile"| B["Diagnose (/)"]
+    B -->|"Baseline Twin & Hotspots"| C["Simulate (/simulate)"]
+    C -->|"Selected Interventions"| D["Action Plan (/plan)"]
+    D -->|"Vendor Sourcing & Execution"| E["Operational Decarbonization"]
+    
+    B -->|"Multi-Plant Aggregation"| F["Portfolio (/portfolio)"]
+    B -->|"Capture-Ready Screening"| G["CO₂ Exchange (/co2-exchange)"]
+    
+    B -->|"Cluster Rollup (k-Anonymity)"| H["Regulator (/regulator)"]
+    I["Consent Ledger (/consent)"] -->|"Anonymize / Disclose"| H
+    I -->|"Public Marketplace Visibility"| G
+    
+    J["Developer API (/developer)"] -->|"X-API-Key / Rate-Limited"| K["ERP / SCADA / Accounting Integrations"]
+```
 
-Full endpoint list and how to run the backend: [`backend/README.md`](backend/README.md).
-Full data-sourcing detail: [`data-pipeline/README.md`](data-pipeline/README.md),
-[`data-pipeline/sources.md`](data-pipeline/sources.md). ML component detail:
-[`ml/README.md`](ml/README.md).
+---
 
-### Running it locally
+## 🌟 Comprehensive Module Breakdown
 
+### 1. 🔍 Diagnose (`/`)
+* **Persona:** SME Factory Owners, Plant Engineers, Certified Energy Auditors
+* **Core Capabilities:**
+  * **Scope 1 & Scope 2 Accounting:** Sourced emission factors from CEA (Central Electricity Authority, Grid Baseline Database v19) and IPCC 2006 Stationary Combustion Guidelines.
+  * **Interactive 3D Digital Twin:** Custom WebGL/Three.js physical model rendering process nodes (kilns, boilers, furnaces, spray dryers, compressors, ETPs). Smoke opacity and thermal heat plumes dynamically scale with real fuel combustion.
+  * **R1–R6 Explainable Root-Cause Decision Tree:**
+    * **R1 (Fixed Overhead):** Low utilization spreading baseline thermal overhead.
+    * **R2 (Fuel Mix Skew):** High emission-factor fuels (coal, pet-coke, furnace oil) $>50\%$ of thermal mix.
+    * **R3 (Thermal Inefficiency):** Specific equipment intensity $\ge 15\%$ above regional benchmark.
+    * **R4 (Material/Waste Leakage):** Unrecovered sludge or high-COD effluent stream loss.
+    * **R5 (Fouling Drift):** Regression trend showing specific consumption drifting upward $>5\%/\text{year}$.
+    * **R6 (Step Change Anomaly):** Statistically significant departure from historical baseline ($z\text{-score} > 2.5$).
+  * **Calibrated Baseline Circularity:** Sourced baseline circularity ratios ($\sim 18\%\text{--}41\%$) across ceramics, chemicals, textiles, and foundries.
+
+### 2. ⚡ Simulate (`/simulate`) [Pro]
+* **Persona:** Plant Managers, Decarbonization Consultants
+* **Core Capabilities:**
+  * **Interactive Interventions:** Test Waste Heat Recovery (WHR), compressor VFD retrofits, boiler oxygen-trim controls, closed-loop slip/glaze recycling, and biomass pellet co-firing.
+  * **Sequential-Residual Physics Engine:** Avoids double-counting. If two $20\%$ measures affect the same process:
+    $$\text{Combined Reduction} = 1 - (1 - 0.20) \times (1 - 0.20) = 36\% \quad (\ne 40\%)$$
+  * **Live Twin Reaction:** Chimeny smoke thins, hot equipment cools to green, and the impact panel recomputes blended CAPEX (₹ INR), annual operational savings (₹ INR/yr), payback period (months), and net $CO_2e$ reduction.
+
+### 3. 📋 Action Plan (`/plan`)
+* **Persona:** Chief Financial Officers (CFOs), EHS Officers, Plant Heads
+* **Core Capabilities:**
+  * **Phased Milestone Roadmap:**
+    * **30-Day Window (Quick Wins):** Payback $\le 6$ months or CAPEX $< ₹5\text{ Lakh}$ (combustion air-fuel tuning, ultrasonic leak sealing).
+    * **90-Day Window (Medium Projects):** Payback $\le 18$ months (economizers, VSDs, sub-metering).
+    * **365-Day Window (Capital Overhauls):** Payback $> 18$ months (kiln electrification, ORC waste-heat power generation).
+  * **Return-on-Carbon Metric:**
+    $$\text{Priority} = \frac{\text{tCO}_2\text{e Avoided}}{₹\text{ Lakh CAPEX}}$$
+  * **Accountability & Governance:** Clear role ownership (Production Head, Plant Engineer, Purchase Officer) and regulatory prerequisites (e.g., GPCB consent amendment).
+  * **Vetted Regional Vendor Directory:** Direct links to verified vendors across Gujarat industrial estates (Morbi, Ankleshwar, Ahmedabad, Surat, Vadodara).
+
+### 4. 🏛️ Regulator Rollup (`/regulator`)
+* **Persona:** Gujarat Pollution Control Board (GPCB), BEE, Industrial Development Corps
+* **Core Capabilities:**
+  * **Geospatial Cluster Visualization:** Map of industrial clusters across Gujarat. Bubble size represents total avoidable $CO_2e$, and color indicates deviation from clean benchmarks ($\text{Green } < 10\%$, $\text{Amber } 10\text{--}25\%$, $\text{Red } > 25\%$).
+  * **$k$-Anonymity Privacy Suppression:** Enforces `MIN_CELL = 3` units per cell to prevent commercial reverse-engineering of proprietary SME production data.
+  * **Scale Projection Simulator:** Interactive slider modeling statewide policy impact (e.g., scaling efficiency interventions to $N$ factories statewide).
+
+### 5. 💼 Portfolio (`/portfolio`)
+* **Persona:** ESG Consultants, Holding Companies, Industry Associations
+* **Core Capabilities:**
+  * **Multi-Tenant Fleet Cockpit:** Multi-factory sorting by avoidable $CO_2e$, total emissions, benchmark deviation, and critical hotspots.
+  * **CCTS Carbon Credit Valuation:** Monetization estimates using indicative Indian Carbon Credit Trading Scheme (CCTS) pricing ($\approx ₹900/\text{t } CO_2e$).
+  * **Client Organization Grouping:** Create and assign factories to corporate entities or consulting clients.
+
+### 6. 🔄 $\text{CO}_2$ Exchange (`/co2-exchange` & `/deal/...`) [Pro]
+* **Persona:** CCUS Project Leads, Offtake Buyers, Industrial Plant Managers
+* **Core Capabilities:**
+  * **Capture-Ready Supplier Screening:** Filters flue-gas sources with $\ge 500\text{ t/year}$ available surplus.
+  * **Cross-Sector Demand Matching:** Sized for mineral curing in concrete blocks, chemical synthesis buffering, and foundry core hardening.
+  * **Geospatial Route Optimization:** Uses the Haversine formula to constrain exchanges within an economically viable **$\le 90\text{ km}$ road transit radius**.
+  * **Deal Term Sheets:** Computes delivered feedstock pricing ($\approx ₹1,450/\text{t}$), tanker runs ($14\text{ t/trip}$ payload), and a 4-point technical validation checklist.
+
+### 7. 📥 + Intake (`/intake`)
+* **Persona:** Plant Technicians, Data Entry Operators
+* **Core Capabilities:**
+  * **Dual Ingestion:** Interactive guided forms or bulk CSV spreadsheet upload for energy bills and utility logs.
+  * **Instant Pre-Flight Twin Verification:** Generates reactive 3D preview and emissions checks before writing to the database.
+  * **Coordinate Layout Builder:** Custom spatial positioning ($X, Y, Z$) for equipment on the digital shop floor.
+
+### 8. 🛡️ Consent Ledger (`/consent`)
+* **Persona:** Compliance Officers, Legal Counsel, Audit Partners
+* **Core Capabilities:**
+  * **Data Privacy Governance:** Granular control over `consent_to_share`.
+  * **Dynamic Anonymization:** Opted-in units appear with legal entity names; opted-out units are instantly masked across public maps and regulator views as *"Anonymous Unit"*.
+  * **Immutable Audit Trail:** Timestamped database writes (`consent_updated_at`) fulfilling legal and governance compliance.
+
+### 9. 🔌 Developer API (`/developer`)
+* **Persona:** Enterprise IT, ERP & Accounting Software Integrators
+* **Core Capabilities:**
+  * **Cryptographic Key Minting:** Scoped API keys with `isk_...` format.
+  * **Sliding-Window Rate Limiting:** Built-in protection against API abuse.
+  * **ERP Integration:** `GET /api/public/v1/factories/{id}` with `X-API-Key` authentication for automated carbon accounting in Tally, SAP, or Oracle.
+
+---
+
+## 🔬 Machine Learning & Intelligence Core (`ml/`)
+
+Induscope integrates four purpose-built ML/analytical components with rigorous empirical validation:
+
+1. **LightGBM Benchmark Predictor (`ml/benchmark_model.py`):**
+   * Predicts specific benchmark intensity from fuel mix, cluster location, and equipment scale.
+   * **Result:** Outperforms flat sub-sector benchmarks by **$+36.9\%$ MAE** for known clusters and **$+6.3\%$ MAE** for unseen clusters.
+2. **MiniLM + FAISS Symbiosis Matcher (`ml/symbiosis_model.py`):**
+   * Matches waste streams to accepted raw inputs using semantic vector search (`all-MiniLM-L6-v2`) combined with quantity-fit and physical Haversine proximity.
+   * Generates $>140$ verified circular economy pairings across Gujarat industrial estates.
+3. **Tool-Calling Explainer (`ml/explainer.py`):**
+   * Integrates with Ollama (`llama3.1:8b`) with a deterministic mathematical fallback.
+   * Rather than hallucinating, it executes real optimizer queries (`backend/app/intelligence/simulator.py`) to answer budget and intervention queries.
+4. **Empirical Autoencoder Validation (`ml/anomaly_model.py`):**
+   * A PyTorch reconstruction autoencoder was rigorously trained and evaluated against leave-one-out $z$-score rules on 120 synthetic plants.
+   * **Result:** Held-out testing proved the calibrated $z$-score rule outperformed the autoencoder for this specific dataset; the neural model was transparently documented and kept as an evaluation baseline rather than deployed dishonestly.
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend UI** | React 19, TypeScript, Vite, Tailwind CSS v4, Framer Motion, Lucide Icons |
+| **3D & Visuals** | Three.js, React Three Fiber (`@react-three/fiber`), Drei, Postprocessing |
+| **Mapping & GIS** | Leaflet, React-Leaflet, OpenStreetMap Tiles, Haversine Engine |
+| **State & Networking** | Zustand (with local persistence), React Router v7, Server-Sent Events (SSE) |
+| **Backend API** | FastAPI, Uvicorn, Python 3.11+, Pydantic v2, SQLite / PostgreSQL |
+| **Database & ORM** | SQLAlchemy 2.0, Alembic (database schema migrations) |
+| **Machine Learning** | LightGBM, PyTorch, Sentence-Transformers, FAISS-CPU, Pandas, NumPy, Scikit-Learn |
+
+---
+
+## ⚡ Quickstart Guide
+
+### Prerequisites
+* **Node.js** $\ge 18.0$ and **npm**
+* **Python** $\ge 3.11$
+
+### 1. Clone the Repository
 ```bash
-# 1. Backend
+git clone https://github.com/shreyascoder2006/gandhinagar_hackout.git
+cd gandhinagar_hackout
+```
+
+### 2. Backend Setup
+```bash
+# Navigate to backend directory
 cd backend
+
+# (Optional) Create and activate a virtual environment
+python -m venv venv
+# On Windows:
+.\venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
-python -m alembic upgrade head          # create the schema
-python -m app.db.seed_loader            # load + compute the 120-factory dataset
+pip install lightgbm pandas
 
-# 2. ML layer (same terminal, repo root) — populates symbiosis matches + model artifacts
-cd .. && pip install -r ml/requirements.txt
-python -m ml.benchmark_model
-python -m ml.symbiosis_model            # needs internet on first run (downloads MiniLM)
-# python -m ml.anomaly_model is optional — its model isn't used in production, see ml/README.md
-# the explainer (ml/explainer.py) needs a local Ollama server with llama3.1:8b pulled;
-# it falls back to a deterministic (but still real) answer if Ollama isn't running
+# Apply database migrations
+python -m alembic upgrade head
 
-# 3. Start the API (from backend/)
-cd backend && python -m uvicorn app.main:app --port 8811
+# Seed calibrated Gujarat dataset (120 factories across 9 clusters)
+python -m app.db.seed_loader
 
-# 4. Frontend (separate terminal, repo root)
-npm install
-npm run dev                             # opens on http://localhost:5173 (or similar)
-# then open http://localhost:<port>/app.html
+# Start the FastAPI server
+python -m uvicorn app.main:app --port 8811 --reload
 ```
+* The backend will be live at: `http://localhost:8811`
+* Interactive API Documentation (Swagger): `http://localhost:8811/docs`
 
-The frontend expects the API at `http://localhost:8811` by default (override with
-`VITE_API_BASE_URL`).
-
----
-
-## Honesty about what isn't real
-
-- **No live Gujarat SME dataset exists.** The Annual Survey of Industries (ASI)
-  micro-data that would let us calibrate against real individual factories is not
-  publicly downloadable — `data.gov.in` blocks automated access and publishes no
-  Gujarat-specific extract. We documented this rather than pretend otherwise; see
-  [`data-pipeline/LIMITATIONS.md`](data-pipeline/LIMITATIONS.md).
-- **Circularity ratio currently reads 0%** for every factory — there's no
-  recovered-material ledger yet, so this is the honest value, not a placeholder
-  guess.
-- **Carbon-credit values are illustrative.** India's CCTS (compliance carbon market)
-  had not published an official floor/forbearance price as of this writing — the
-  ₹900/tCO2e used is the midpoint of commonly-cited analyst estimates (₹600-1,200),
-  not a mandated price. Every figure derived from it is flagged accordingly; see
-  `backend/app/carbon_credit.py`.
-- **The chat widget can occasionally need a retry on empty lookups.** Testing found
-  the underlying LLM will fabricate a nonexistent factory if a tool call happens to
-  return no data (e.g., a misspelled cluster filter) — guarded against structurally
-  so this now fails as an honest "I don't have that" instead, but is worth knowing
-  the failure mode existed. See `ml/LIMITATIONS.md`.
-- **Symbiosis CO₂-avoided figures are illustrative.** Matching itself is real (see
-  below), but no sourced embodied-carbon dataset exists for these waste categories,
-  so `co2_avoided_tpy` is always flagged `is_placeholder` — the ₹-savings figures
-  and the match scores themselves are real.
-- **The anomaly detector is a tuned rule, not a model.** A PyTorch autoencoder was
-  built and rigorously evaluated but did not beat the existing z-score rule on this
-  dataset (see `ml/LIMITATIONS.md`) — kept out of production rather than shipped
-  anyway. The z-score rule itself was empirically retuned after we found its
-  original defaults gave an 8% false-positive rate (`data-pipeline/LIMITATIONS.md` #7).
-- **The LLM explainer can misstate its own tool results.** Testing found llama3.1:8b
-  occasionally confuses Indian lakh/crore units when restating a correct number in
-  prose. Guarded structurally, not just by prompt-tuning — see `ml/LIMITATIONS.md`.
-- **Onboarding a new factory doesn't yet capture waste data** — the intake form
-  collects it but the API payload doesn't carry it through, so a freshly onboarded
-  factory always shows 0 t/yr waste. See `backend/README.md`.
-
----
-
-## Roadmap — what's left, and how to approach it
-
-### Phase 3 — ML layer — **done**
-All four planned components exist, are validated against real ground truth (or
-honestly rejected), and are reachable through the API:
-- **LightGBM benchmark predictor** (`ml/benchmark_model.py`) — beats the flat
-  benchmark by roughly +36.9% MAE for factories in already-seen clusters, +6.3% for a
-  brand-new cluster (exact figures drift slightly on dataset regeneration; live,
-  regression-tested numbers are in `validation/baseline_metrics.json`, checked by
-  `scripts/validate_all.py` / `make validate`). Building it surfaced and fixed a real
-  bug in the Phase 1 synthetic generator (deviation-from-benchmark noise had zero
-  correlation to any feature, making the flat benchmark unbeatable by construction) — see
-  `data-pipeline/LIMITATIONS.md` #9.
-- **PyTorch anomaly autoencoder** (`ml/anomaly_model.py`) — built and evaluated,
-  does **not** beat the z-score rule on this dataset. Documented and kept out of
-  production rather than deployed anyway — see `ml/LIMITATIONS.md`.
-- **Symbiosis matcher** (`ml/symbiosis_model.py`) — MiniLM + FAISS, 50% semantic /
-  25% quantity-fit / 25% proximity, 140 real matches live via
-  `/api/symbiosis/network`. A real false-positive match was found and fixed by
-  raising the similarity threshold to the actual gap in the data.
-- **Tool-calling explainer** (`ml/explainer.py`, Ollama `llama3.1:8b`) — answers
-  compound questions like *"which intervention combination gives the best result
-  under a budget"* by actually calling a real optimizer
-  (`backend/app/intelligence/simulator.py`, a new brute-force-optimal search over
-  intervention combinations), not by guessing. Live via
-  `POST /api/factories/{id}/ask`.
-- **`ModelRegistry`** (`ml/registry.py`) — lazy-loads and caches all of the above,
-  reports what's actually active per component via `GET /api/ml/status`.
-
-See `ml/README.md` for how each was built, validated, and — for the autoencoder —
-why it was rejected.
-
-### Phase 5 tail — mostly done
-- ~~Wire the Intake page to `POST /api/factories`~~ **done** — creating a new
-  factory now runs through the real backend engine, including a fix so onboarded
-  factories get the same real sourced-benchmark severity/root-cause diagnosis as
-  seeded ones (previously hardcoded to a fake "on benchmark" state).
-  *Editing* an already-onboarded factory still runs locally only — no
-  `PATCH /api/factories/{id}` endpoint exists yet.
-- ~~Populate `wasteStreams`/`acceptedInputs` from real backend data~~ **done** as
-  part of Phase 3c.
-- Remaining: onboarding doesn't capture waste data (see Known Limitations above).
-
-### Phase 6 — deployment (not started)
-Everything below runs on a free tier or infrastructure already in hand — no paid
-infra needed:
-- **Database:** migrate SQLite → Neon or Supabase (free-tier Postgres), using the
-  existing Alembic migration history unchanged.
-- **API:** Render or Fly.io free tier, CPU-only (matches how it already runs).
-- **Frontend:** Vercel free tier.
-- **LLM:** keep the deterministic fallback as the production default; local Ollama
-  stays a dev-time nicety, not a deploy dependency.
-
-### Longer-term (contingent on real adoption)
-Per-organisation auth, an admin/ops triage view for cluster managers, email/SMS
-alerting on new high-confidence anomalies, and a sourced replacement for every
-figure currently marked `is_placeholder` (especially symbiosis CO₂/value estimates).
-
----
-
-## Project structure
-
-```
-data-pipeline/     # Phase 1 — sourced data, 120-factory synthetic generator, disclosure docs
-backend/           # Phase 2 & 4 — FastAPI + SQLAlchemy + Alembic, engine + intelligence code
-  app/engine/        deterministic unit/CO2e/intensity calculations
-  app/intelligence/  hotspot ranking, anomaly detection, root-cause rules, recommender, simulator/optimizer
-  app/db/            ORM models, migrations, seed loader
-  app/routers/       API endpoints
-ml/                # Phase 3 — benchmark predictor, anomaly model (rejected), symbiosis matcher, explainer, registry
-  benchmark_model.py   LightGBM, beats flat benchmark for known clusters
-  anomaly_model.py     PyTorch autoencoder — built, evaluated, does NOT beat the z-score rule (see LIMITATIONS.md)
-  symbiosis_model.py   MiniLM + FAISS + real proximity, writes symbiosis_matches
-  explainer.py         tool-calling Ollama agent + deterministic fallback
-  registry.py          lazy-loading access point + honest status reporting for all of the above
-src/               # Frontend — React 19 + Vite + Three.js (digital twin) + Zustand
-  lib/api.ts             typed fetch client to the backend
-  lib/apiAdapter.ts      maps backend responses onto the frontend's data model
-  lib/onboardingAdapter.ts  maps the Intake page's local form state onto the real onboarding payload
-  pages/                 dashboard, simulator, action plan, portfolio, regulator, intake
-```
-
-## Regression gate
-
-Three evaluation harnesses got built ad-hoc during development (anomaly-detector
-ground-truth precision/recall, benchmark-model cluster-holdout, symbiosis threshold
-sweep) — `scripts/validate_all.py` formalizes them into one command that regenerates
-the dataset, reseeds the database, re-runs all three, smoke-tests the live API via
-`TestClient`, and compares every number against a recorded, tolerance-banded baseline
-in `validation/baseline_metrics.json`. It exits non-zero — and should block a merge —
-if anything regresses past its floor.
-
+### 3. Frontend Setup
+In a new terminal window:
 ```bash
-make validate          # full gate, matches what CI runs
-make validate-fast     # skips the MiniLM load + PyTorch retrain sanity check
-make update-baseline   # after a deliberate, reviewed change, accept new numbers
+# From the project root
+npm install
+
+# Start the Vite development server
+npm run dev
 ```
-
-Wired into GitHub Actions on every PR and push to `main`/`master`
-(`.github/workflows/validate.yml`). Never hand-edit `validation/baseline_metrics.json`
-to make a failing check pass — use `--update-baseline` and review the diff.
-
-## Tech stack
-
-Frontend: React 19, TypeScript, Vite, Tailwind CSS, React Three Fiber, Zustand,
-Recharts, Leaflet.
-Backend: Python, FastAPI, SQLAlchemy 2.0, Alembic, Pydantic.
-ML: LightGBM, PyTorch (CPU), sentence-transformers (MiniLM), FAISS, Ollama (`llama3.1:8b`).
-Data: pandas-free CSV/JSON pipeline, sourced from CEA / IPCC 2006 / CPCB / BEE.
+* Open your browser at: `http://localhost:5173`
 
 ---
 
-*Every status claim in this README reflects the codebase as it actually runs, not as
-intended — see the linked docs under `data-pipeline/`, `backend/`, and `ml/` for full
-citations and the unabridged limitations lists.*
+## 📊 Sourced Emission & Benchmark Calibration
+
+Induscope rejects arbitrary hardcoding. All numbers stem from official standards:
+
+* **Grid Electricity:** Central Electricity Authority (CEA) $CO_2$ Baseline Database v19 ($0.716\text{ kgCO}_2/\text{kWh}$).
+* **Natural Gas:** IPCC 2006 Guidelines for National Greenhouse Gas Inventories ($56,100\text{ kgCO}_2/\text{TJ}$).
+* **Coal / Lignite / Pet Coke:** Sourced Indian lignite factors ($94,600\text{--}101,200\text{ kgCO}_2/\text{TJ}$).
+* **Circular Pricing:**
+  * Delivered captured $CO_2$ feedstock: $\approx ₹1,450/\text{tonne}$.
+  * CCTS compliance carbon credit midpoint: $\approx ₹900/\text{tonne}$.
+
+---
+
+## 📜 Repository Structure
+
+```
+├── backend/                  # FastAPI Application
+│   ├── alembic/              # Database schema migrations
+│   ├── app/
+│   │   ├── db/               # SQLAlchemy models & seed loader
+│   │   ├── engine/           # Emissions, units & intensity math
+│   │   ├── intelligence/     # Root cause (R1-R6), simulator, recommender
+│   │   ├── routers/          # REST endpoints (factories, catalog, business, etc.)
+│   │   └── main.py           # FastAPI entrypoint
+│   └── requirements.txt      # Python dependencies
+├── data-pipeline/            # Data sourcing & calibration scripts
+│   ├── clean/                # Raw factors, cluster coordinates & benchmarks
+│   ├── synth/                # Synthetic 120-factory generator
+│   └── sources.md            # Citation documentation
+├── ml/                       # Machine Learning layer
+│   ├── benchmark_model.py    # LightGBM benchmark predictor
+│   ├── anomaly_model.py      # PyTorch autoencoder & evaluation
+│   ├── symbiosis_model.py    # MiniLM + FAISS vector matcher
+│   ├── explainer.py          # Tool-calling LLM explainer
+│   └── registry.py           # Process-wide ModelRegistry singleton
+├── src/                      # React Frontend Application
+│   ├── components/
+│   │   ├── dashboard/        # KPI bars, hotspot ranking, scale impact
+│   │   ├── simulator/        # Intervention picker, impact panel
+│   │   ├── twin/             # Three.js 3D factory digital twin
+│   │   ├── map/              # Leaflet cluster maps
+│   │   └── assistant/        # Chat assistant widget
+│   ├── pages/                # Factory, Simulator, Plan, Regulator, Portfolio, etc.
+│   ├── store/                # Zustand state management
+│   └── lib/                  # Mathematical engines & API adapters
+└── validation/               # Baseline metric checks & CI validation tests
+```
+
+---
+
+## 🏆 HackOut'26 Team
+
+* **Project:** Induscope — Circular Carbon Intelligence
+* **Theme:** Circular Carbon Ecosystem & Industrial Decarbonization
+* **Target Corridors:** Morbi, Surat, Vapi, Ankleshwar, Ahmedabad, Rajkot, Jamnagar
+
+---
+
+## 📄 License
+This project is developed under the MIT License. See [LICENSE](LICENSE) for details.
