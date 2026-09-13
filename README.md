@@ -13,6 +13,8 @@
 > 
 > **Induscope** is an end-to-end industrial decarbonization, digital twin, and circular economy intelligence platform purpose-built for Gujarat's key SME manufacturing corridors (Morbi Ceramics, Surat Textiles, Vapi & Ankleshwar Chemicals, Rajkot & Jamnagar Engineering).
 
+🌐 **Live Demo:** [http://51.79.160.168/](http://51.79.160.168/)
+
 ---
 
 ## 📌 The Industrial Challenge
