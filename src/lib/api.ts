@@ -3,7 +3,8 @@
 // traces to a real computation (app/engine + app/intelligence over
 // data-pipeline output), not a mock.
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8811";
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? "http://localhost:8811" : "");
 
 async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`);
